@@ -2,11 +2,9 @@ package explorandum.f09.g2;
 
 import java.awt.Color;
 import java.awt.Point;
-import java.io.FileInputStream;
-import java.io.IOException;
+//import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.Properties;
 
 import explorandum.Logger;
 import explorandum.Move;
@@ -17,7 +15,7 @@ public class Player2 implements Player {
 	Random rand;
 	Logger log;
 
-
+	
 	public Color color() throws Exception {
 		return Color.GREEN;
 	}
@@ -38,11 +36,11 @@ public class Player2 implements Player {
 
 	
 	public void register(int explorerID, int rounds, int explorers, int range,
-			Logger _log, Random rand) {
+			Logger _log, Random _rand) {
 		CellMemory = new ArrayList<Point>();
 		log = _log;
+		rand = _rand;
 		log.debug("\nRounds:" + rounds + "\nExplorers:" + explorers + "\nRange:" + range);
 	}
-
 
 }
