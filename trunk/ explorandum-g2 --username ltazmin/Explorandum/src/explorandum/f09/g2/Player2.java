@@ -17,7 +17,7 @@ public class Player2 implements Player {
 
 	
 	public Color color() throws Exception {
-		return Color.GREEN;
+		return Color.BLUE;
 	}
 
 	
