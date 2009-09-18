@@ -8,11 +8,16 @@ import explorandum.Logger;
 import explorandum.Move;
 import explorandum.Player;
 
+/**
+ * Extension of the Player class for Group 2
+ * @author sharadh
+ *
+ */
 public class G2Player implements Player {
 
 	@Override
 	public Color color() throws Exception {
-		return Color.CYAN;
+		return new Color(102,205,170);
 	}
 
 	@Override
