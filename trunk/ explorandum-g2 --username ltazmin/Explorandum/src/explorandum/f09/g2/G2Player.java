@@ -15,12 +15,10 @@ import explorandum.Player;
  */
 public class G2Player implements Player {
 
-	@Override
 	public Color color() throws Exception {
 		return new Color(102,205,170);
 	}
 
-	@Override
 	public Move move(Point currentLocation_, Point[] offsets_,
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
@@ -40,13 +38,11 @@ public class G2Player implements Player {
 
 	}
 
-	@Override
 	public String name() throws Exception {
 		// TODO Auto-generated method stub
 		return "Lumbering Troglodyte";
 	}
 
-	@Override
 	public void register(int explorerID_, int rounds_, int explorers_,
 			int range_, Logger log_, Random rand_) {
 		// TODO Auto-generated method stub
