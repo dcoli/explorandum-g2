@@ -15,6 +15,19 @@ import explorandum.Player;
  */
 public class G2Player implements Player {
 
+	private int explorerID;
+	private int rounds;
+	private int explorersCount;
+	private int range;
+	private Logger log;
+	
+	private Grid grid;
+	
+	public G2Player(){
+		grid = new Grid();
+		
+	}
+	
 	public Color color() throws Exception {
 		return new Color(102,205,170);
 	}
@@ -23,15 +36,17 @@ public class G2Player implements Player {
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
 
+		//Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
-			Grid.updateSeenCellInformation(offsets_[i], terrain_[i],
+			grid.updateSeenCellInformation(offsets_[i], terrain_[i],
 					hasExplorer_[i]);
 		}
 
-		Grid.updateVisitedCellInformation(currentLocation_, time_, StepStatus,
+		//Update the visited cell information
+		grid.updateVisitedCellInformation(currentLocation_, time_, StepStatus,
 				false);
 
-		Move m = Grid.getMoveFrom(currentLocation_);
+		Move m = Helper.getMoveFrom(currentLocation_,grid);
 		System.out.println(m);
 
 		return m;
@@ -45,8 +60,16 @@ public class G2Player implements Player {
 
 	public void register(int explorerID_, int rounds_, int explorers_,
 			int range_, Logger log_, Random rand_) {
-		// TODO Auto-generated method stub
 
+		//Update game variables
+		explorerID = explorerID_;
+		rounds = rounds_;
+		explorersCount = explorers_;
+		range = range_;
+		log = log_;
+		
+		//Clear previous information
+		grid.clear();
 	}
 
 }
