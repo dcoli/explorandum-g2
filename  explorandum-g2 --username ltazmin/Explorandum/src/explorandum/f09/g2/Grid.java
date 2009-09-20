@@ -5,8 +5,9 @@ import java.util.HashMap;
 
 /**
  * Class for the Grid/Map
+ * 
  * @author sharadh
- *
+ * 
  */
 public class Grid {
 
@@ -14,7 +15,7 @@ public class Grid {
 	 * Hashmap with key as Point and value as Cell
 	 */
 	private HashMap<Point, Cell> gridMap;
-	
+
 	/**
 	 * Private Constructor
 	 */
@@ -22,15 +23,16 @@ public class Grid {
 		gridMap = new HashMap<Point, Cell>();
 	}
 
-
 	/**
 	 * Clears all present information
 	 */
-	public void clear(){
+	public void clear() {
 		gridMap.clear();
 	}
+
 	/**
 	 * Returns the cell represented by co-ordiantes given by point P
+	 * 
 	 * @param p
 	 * @return
 	 */
@@ -40,6 +42,7 @@ public class Grid {
 
 	/**
 	 * Puts the cell c into the grid, indexed by point p
+	 * 
 	 * @param p
 	 * @param c
 	 */
@@ -47,18 +50,16 @@ public class Grid {
 		gridMap.put(p, c);
 	}
 
-/*	public static HashSet<Point> campSites = new HashSet<Point>();
-
-	public static Point getClosestCampSite(Point p) {
-		return null;
-	}
-
-	public static void putCell(Point p) {
-		campSites.add(p);
-	}
-*/
+	/*
+	 * public static HashSet<Point> campSites = new HashSet<Point>();
+	 * 
+	 * public static Point getClosestCampSite(Point p) { return null; }
+	 * 
+	 * public static void putCell(Point p) { campSites.add(p); }
+	 */
 	/**
 	 * Updates the information for a cell which has been visited by player
+	 * 
 	 * @param p
 	 * @param turn
 	 * @param isFootPrintPresent
@@ -71,7 +72,8 @@ public class Grid {
 
 			// Update Visitation
 			cell.setVisited(true);
-			cell.setVisitationTurn(turn);
+			cell.setLastTurnVisited(turn);
+			cell.incrementNoOfTimesVisited();
 
 			// Update Ownership
 			if (cell.getOwner() != Constants.OWNER_BY_US) {
@@ -79,19 +81,23 @@ public class Grid {
 					cell.setOwner(Constants.OWNED_BY_THEM);
 				} else {
 					cell.setOwner(Constants.OWNER_BY_US);
+					cell.setFirstTurnVisited(turn);
 				}
 			}
 		} else {
 			cell = new Cell(p);
 			cell.setVisited(true);
-			cell.setVisitationTurn(turn);
+			cell.setFirstTurnVisited(turn);
+			cell.setLastTurnVisited(turn);
 			cell.setOwner(Constants.OWNER_BY_US);
+			cell.incrementNoOfTimesVisited();
 			putCell(p, cell);
 		}
 	}
 
 	/**
 	 * Updates the information of a cell which has been seen by player
+	 * 
 	 * @param p
 	 * @param terrain
 	 * @param isExplorerSeen
@@ -115,5 +121,104 @@ public class Grid {
 		}
 	}
 
+	/**
+	 * Computes the score of this cell based on various parameters
+	 * 
+	 * @param cell_
+	 * @param grid_
+	 */
+	public void computeScore(Cell cell_, Grid grid_) {
+		if (cell_.isImpassable()) {
+			cell_.setScore(-100);
+		} else {
 
+			int px = cell_.getPoint().x;
+			int py = cell_.getPoint().y;
+			int score = 0;
+
+			// Edge Neighbours
+			for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
+				Cell c = grid_.getCell(new Point(px
+						+ Constants.EDGE_NEIGHBOR_OFFSETS[i][0], py
+						+ Constants.EDGE_NEIGHBOR_OFFSETS[i][1]));
+				if (c != null) {
+					switch (c.getTerrain()) {
+					case Constants.TERRAIN_LAND:
+						score += 1;
+						break;
+
+					case Constants.TERRAIN_WATER:
+						score += 3;
+						break;
+
+					case Constants.TERRAIN_MOUNTAIN:
+						score += 2;
+						break;
+					}
+					score += 1;
+
+					switch (c.getOwner()) {
+					case Constants.OWNED_BY_THEM:
+						score -= 1;
+						break;
+
+					case Constants.OWNER_BY_US:
+						score -= 1;
+						break;
+
+					case Constants.OWNED_BY_UNKNOWN:
+						score += 2;
+						break;
+					}
+				} else {
+					score += 2;
+				}
+
+			}
+
+			// Edge Neighbours
+			for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
+				Cell c = grid_.getCell(new Point(px
+						+ Constants.VERTEX_NEIGHBOR_OFFSETS[i][0], py
+						+ Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]));
+
+				if (c != null) {
+					switch (c.getTerrain()) {
+					case Constants.TERRAIN_LAND:
+						score += 1;
+						break;
+
+					case Constants.TERRAIN_WATER:
+						score += 3;
+						break;
+
+					case Constants.TERRAIN_MOUNTAIN:
+						score += 2;
+						break;
+					}
+
+					switch (c.getOwner()) {
+					case Constants.OWNED_BY_THEM:
+						score -= 1;
+						break;
+
+					case Constants.OWNER_BY_US:
+						score -= 1;
+						break;
+
+					case Constants.OWNED_BY_UNKNOWN:
+						score += 2;
+						break;
+					}
+
+				} else {
+					score += 2;
+				}
+
+			}
+
+			cell_.setScore(score);
+		}
+
+	}
 }

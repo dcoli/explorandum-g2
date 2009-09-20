@@ -105,7 +105,7 @@ public class Helper {
 	 * @param point_
 	 * @return
 	 */
-	public static Move getMoveFrom(Point point_,Grid grid_) {
+	public static Move getMoveFrom(Point point_, Grid grid_) {
 
 		ArrayList<Cell> unVisitedNeighbours = new ArrayList<Cell>();
 		ArrayList<Cell> visitedNeighbours = new ArrayList<Cell>();
@@ -114,21 +114,21 @@ public class Helper {
 		int oldestVisitIndex = 0;
 		int oldestVisit = Integer.MAX_VALUE;
 		for (int i = 0; i < 8; i++) {
-			Cell c = grid_.getCell(
-					new Point(point_.x + GameConstants._dx[i + 1], point_.y
-							+ GameConstants._dy[i + 1]));
+			Cell c = grid_.getCell(new Point(point_.x
+					+ GameConstants._dx[i + 1], point_.y
+					+ GameConstants._dy[i + 1]));
 			if (c != null) {
 				if (!c.isImpassable()) {
 					if (c.isVisited()) {
 						visitedNeighbours.add(c);
-						if (c.getVisitationTurn() < oldestVisit) {
+						if (c.getLastTurnVisited() < oldestVisit) {
 							oldestVisitIndex = visitedNeighbours.size() - 1;
-							oldestVisit = c.getVisitationTurn();
+							oldestVisit = c.getLastTurnVisited();
 
 						}
 					} else {
 						unVisitedNeighbours.add(c);
-						int cellScore = Helper.getCellScore(c,grid_);
+						int cellScore = c.getScore();
 						if (cellScore > maxScore) {
 							maxScoreIndex = unVisitedNeighbours.size() - 1;
 							maxScore = cellScore;
@@ -151,76 +151,4 @@ public class Helper {
 		}
 	}
 
-	/**
-	 * Computes a cell score
-	 * 
-	 * @param c_
-	 * @return
-	 */
-	public static int getCellScore(Cell c_,Grid grid_) {
-		int px = c_.getPoint().x;
-		int py = c_.getPoint().y;
-		int score = 0;
-		System.out.println(c_);
-
-		// Edge Neighbours
-		for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
-			Cell c = grid_.getCell(
-					new Point(px + Constants.EDGE_NEIGHBOR_OFFSETS[i][0], py
-							+ Constants.EDGE_NEIGHBOR_OFFSETS[i][1]));
-			System.out.println("I : " + i + " " + c);
-			if (c != null) {
-				switch (c.getTerrain()) {
-				case Constants.TERRAIN_LAND:
-					score += 1;
-					break;
-
-				case Constants.TERRAIN_WATER:
-					score += 3;
-					break;
-
-				case Constants.TERRAIN_MOUNTAIN:
-					score += 2;
-					break;
-				}
-				score += 1;
-
-				if (c.isVisited()) {
-					score -= 2;
-				}
-			}
-
-		}
-
-		// Edge Neighbours
-		for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
-			Cell c = grid_.getCell(
-					new Point(px + Constants.VERTEX_NEIGHBOR_OFFSETS[i][0], py
-							+ Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]));
-			System.out.println("I : " + i + " " + c);
-			if (c != null) {
-				switch (c.getTerrain()) {
-				case Constants.TERRAIN_LAND:
-					score += 1;
-					break;
-
-				case Constants.TERRAIN_WATER:
-					score += 3;
-					break;
-
-				case Constants.TERRAIN_MOUNTAIN:
-					score += 2;
-					break;
-				}
-				if (c.isVisited()) {
-					score -= 1;
-
-				}
-
-			}
-
-		}
-		System.out.println("Score " + score);
-		return score;
-	}
 }

@@ -31,5 +31,11 @@ public interface Constants {
 	public static final int TERRAIN_MOUNTAIN = GameConstants.MOUNTAIN;
 	public static final int TERRAIN_WATER = GameConstants.WATER;
 	
+	public static final int SHORT_TERM_HISTORY_LENGTH = 5;
 	
+	public static final int LONG_TERM_HISTORY_LENGTH = 20;
+	
+	//Scoring Parameters
+	public static final int FOOTPRINT_HISTORY_THRESHOLD = 5;
+	public static final int CLAIM_HISTORY_THRESHOLD = 10;
 }
