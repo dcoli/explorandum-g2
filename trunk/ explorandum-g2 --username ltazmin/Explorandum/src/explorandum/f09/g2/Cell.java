@@ -11,25 +11,65 @@ import java.awt.Point;
  */
 public class Cell {
 
+	/**
+	 * @return the noOfTimesVisited
+	 */
+	public int getNoOfTimesVisited() {
+		return noOfTimesVisited;
+	}
+
+	/**
+	 * Increments number of times visited
+	 */
+	public void incrementNoOfTimesVisited() {
+		noOfTimesVisited++;
+	}
+
 	private Point p;
 
 	private int terrain = Constants.TERRAIN_UNKNOWN;
 	private int whoOwns = Constants.OWNED_BY_UNKNOWN;
 	private boolean isVisited = false;
-	private int turnVisited = -1;
+	private int turnFirstVisited = -1;
+	private int turnLastVisited = -1;
 	private int noOfTimesVisited = 0;
 
-	public int getVisitationTurn() {
-		return turnVisited;
+	private int score = 0;
+
+	/**
+	 * Gets the first turn this cell was visited
+	 * 
+	 * @return
+	 */
+	public int getFirstTurnVisited() {
+		return turnFirstVisited;
+	}
+
+	/**
+	 * Sets the first turn this cell was visited
+	 * 
+	 * @param turnFirstVisited_
+	 */
+	public void setFirstTurnVisited(int turnFirstVisited_) {
+		turnFirstVisited = turnFirstVisited_;
+	}
+
+	/**
+	 * Gets the last turn this cell was visited
+	 * 
+	 * @return
+	 */
+	public int getLastTurnVisited() {
+		return turnLastVisited;
 	}
 
 	/**
 	 * Sets the
 	 * 
-	 * @param turnVisited_
+	 * @param turnLastVisited_
 	 */
-	public void setVisitationTurn(int turnVisited_) {
-		turnVisited = turnVisited_;
+	public void setLastTurnVisited(int turnLastVisited_) {
+		turnLastVisited = turnLastVisited_;
 	}
 
 	/**
@@ -191,5 +231,22 @@ public class Cell {
 	public Cell getSouthWestCell() {
 		return null;
 	}
+
+	/**
+	 * @return the score
+	 */
+	public int getScore() {
+		return score;
+	}
+
+	/**
+	 * @param score_
+	 *            the score to set
+	 */
+	public void setScore(int score_) {
+		score = score_;
+	}
+
+	
 
 }

@@ -2,6 +2,7 @@ package explorandum.f09.g2;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.Random;
 
 import explorandum.Logger;
@@ -23,9 +24,11 @@ public class G2Player implements Player {
 	
 	private Grid grid;
 	
+	private ArrayList<MoveHistory> history;
+	
 	public G2Player(){
 		grid = new Grid();
-		
+		history = new ArrayList<MoveHistory>();
 	}
 	
 	public Color color() throws Exception {
