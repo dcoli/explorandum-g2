@@ -25,7 +25,7 @@ public class HistoryHelper {
 	 * @param grid_
 	 * @return
 	 */
-	public static int[] analyseHistory(ArrayList<MoveHistory> pastMoves,
+	public static int[] analyseHistory(ArrayList<PastMove> pastMoves,
 			Grid grid_) {
 
 		int historyCount = 0;
@@ -35,7 +35,7 @@ public class HistoryHelper {
 		int dxCount = 0;
 		int dyCount = 0;
 		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
-			MoveHistory m = (MoveHistory) iterator.next();
+			PastMove m = (PastMove) iterator.next();
 			Cell c = grid_.getCell(m.getCurrentLocation_());
 			historyCount++;
 
