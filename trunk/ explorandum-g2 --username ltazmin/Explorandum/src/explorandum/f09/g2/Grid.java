@@ -187,7 +187,7 @@ public class Grid {
 
 			}
 
-			// Edge Neighbours
+			// Vertex Neighbours
 			for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
 				Cell c = grid_.getCell(new Point(px
 						+ Constants.VERTEX_NEIGHBOR_OFFSETS[i][0], py

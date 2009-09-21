@@ -9,7 +9,7 @@ import java.awt.Point;
  * @author sharadh
  * 
  */
-public class Cell {
+public class Cell implements Comparable<Cell> {
 
 	/**
 	 * @return the noOfTimesVisited
@@ -158,6 +158,15 @@ public class Cell {
 	@Override
 	public String toString() {
 		return "[ ( " + p.x + "," + p.y + ") , Terrain =" + terrain + " ]";
+	}
+	
+	/**
+	 * Implement comparable method
+	 */
+	public int compareTo(Cell c) {
+		
+		return score - c.getScore();
+		
 	}
 
 	/**
