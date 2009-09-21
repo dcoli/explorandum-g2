@@ -15,7 +15,15 @@ public class PastMove {
 	Integer[][] visibleExplorers_;
 	int time_;
 	Boolean StepStatus;
+	int newSeenCellCount;
 	
+	/**
+	 * @return the newSeenCellCount
+	 */
+	public int getNewSeenCellCount() {
+		return newSeenCellCount;
+	}
+
 	/**
 	 * @return the currentLocation_
 	 */
@@ -58,9 +66,11 @@ public class PastMove {
 		return StepStatus;
 	}
 
+
+
 	public PastMove(Point currentLocation__, Point[] offsets__,
 			Boolean[] hasExplorer__, Integer[][] visibleExplorers__,
-			int time__, Boolean stepStatus_) {
+			int time__, Boolean stepStatus_, int newSeenCellCount_) {
 		super();
 		currentLocation_ = currentLocation__;
 		offsets_ = offsets__;
@@ -68,6 +78,7 @@ public class PastMove {
 		visibleExplorers_ = visibleExplorers__;
 		time_ = time__;
 		StepStatus = stepStatus_;
+		newSeenCellCount = newSeenCellCount_;
 	}
 	
 	
