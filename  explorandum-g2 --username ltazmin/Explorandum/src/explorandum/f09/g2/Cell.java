@@ -256,6 +256,21 @@ public class Cell implements Comparable<Cell> {
 		score = score_;
 	}
 
+	/**
+	 * 
+	 * @param c
+	 * @return
+	 */
+	public int getDistanceFrom(Cell c){
+		return Math.abs(getPoint().x - c.getPoint().x) +Math.abs(getPoint().y - c.getPoint().y);
+	}
 	
-
+	/**
+	 * 
+	 * @param p
+	 * @return
+	 */
+	public int getDistanceFrom(Point p){
+		return Math.abs(getPoint().x - p.x) +Math.abs(getPoint().y - p.y);
+	}
 }
