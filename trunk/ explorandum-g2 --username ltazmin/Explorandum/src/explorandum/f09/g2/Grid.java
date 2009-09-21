@@ -228,8 +228,6 @@ public class Grid {
 
 			}
 
-			
-			
 			cell_.setScore(score);
 		}
 
@@ -293,5 +291,38 @@ public class Grid {
 	 */
 	public int getMinXtSeen() {
 		return minXSeen;
+	}
+
+	/**
+	 * Analyses and returns an int array of informatiom Index 1 - Estimation of
+	 * map size covered Index 2 - Estimation of map left .....
+	 * 
+	 * @return
+	 */
+	public static int[] analyseGrid() {
+		return new int[] {};
+	}
+
+	/**
+	 * Returns random points chosen
+	 * @param current_
+	 * @return
+	 */
+	private Point[] getRandomTargets(Point current_) {
+		return new Point[] {};
+	}
+
+	/**
+	 * Evaluates random open targets by calling getRandomTargets()
+	 * and chooses the one which has most undiscovered neighbors and unvisited
+	 * neighbors
+	 * 
+	 * Eventually perhaps also one which will also help pick up most cells
+	 * on the way
+	 * @param current_
+	 * @return
+	 */
+	public Point getOpenRandomTarget(Point current_) {
+		return null;
 	}
 }
