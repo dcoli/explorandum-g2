@@ -11,45 +11,43 @@ import explorandum.Player;
 
 /**
  * Extension of the Player class for Group 2
+ * 
  * @author sharadh
- *
+ * 
  */
 public class G2Player implements Player {
 
 	private int explorerID;
-	private int rounds;
-	private int explorersCount;
-	private int range;
 	private Logger log;
-	
+
 	private Grid grid;
-	
+
 	private ArrayList<MoveHistory> history;
-	
-	public G2Player(){
+
+	public G2Player() {
 		grid = new Grid();
 		history = new ArrayList<MoveHistory>();
 	}
-	
+
 	public Color color() throws Exception {
-		return new Color(102,205,170);
+		return new Color(102, 205, 170);
 	}
 
 	public Move move(Point currentLocation_, Point[] offsets_,
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
 
-		//Update visible cell information for all cells
+		// Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
 			grid.updateSeenCellInformation(offsets_[i], terrain_[i],
 					hasExplorer_[i]);
 		}
 
-		//Update the visited cell information
+		// Update the visited cell information
 		grid.updateVisitedCellInformation(currentLocation_, time_, StepStatus,
 				false);
 
-		Move m = Helper.getMoveFrom(currentLocation_,grid);
+		Move m = Helper.getMoveFrom(currentLocation_, grid);
 		System.out.println(m);
 
 		return m;
@@ -64,14 +62,14 @@ public class G2Player implements Player {
 	public void register(int explorerID_, int rounds_, int explorers_,
 			int range_, Logger log_, Random rand_) {
 
-		//Update game variables
+		// Update game variables
 		explorerID = explorerID_;
-		rounds = rounds_;
-		explorersCount = explorers_;
-		range = range_;
+		Constants.NO_OF_ROUNDS = rounds_;
+		Constants.NO_OF_EXPLORERS = explorers_;
+		Constants.RANGE = range_;
 		log = log_;
-		
-		//Clear previous information
+
+		// Clear previous information
 		grid.clear();
 	}
 
