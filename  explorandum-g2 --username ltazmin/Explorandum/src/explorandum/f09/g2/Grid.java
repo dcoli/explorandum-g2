@@ -17,6 +17,14 @@ public class Grid {
 	private HashMap<Point, Cell> gridMap;
 
 	/**
+	 * Counters to understand map size
+	 */
+	private int minYSeen = 0;
+	private int maxXSeen = 0;
+	private int minXSeen = 0;
+	private int maxYSeen = 0;
+
+	/**
 	 * Private Constructor
 	 */
 	public Grid() {
@@ -68,31 +76,29 @@ public class Grid {
 	public void updateVisitedCellInformation(Point p, int turn,
 			boolean isFootPrintPresent, boolean isExplorerPresent) {
 		Cell cell = getCell(p);
-		if (cell != null) {
-
-			// Update Visitation
-			cell.setVisited(true);
-			cell.setLastTurnVisited(turn);
-			cell.incrementNoOfTimesVisited();
-
-			// Update Ownership
-			if (cell.getOwner() != Constants.OWNER_BY_US) {
-				if (isFootPrintPresent) {
-					cell.setOwner(Constants.OWNED_BY_THEM);
-				} else {
-					cell.setOwner(Constants.OWNER_BY_US);
-					cell.setFirstTurnVisited(turn);
-				}
-			}
-		} else {
+		if (cell == null) {
 			cell = new Cell(p);
-			cell.setVisited(true);
-			cell.setFirstTurnVisited(turn);
-			cell.setLastTurnVisited(turn);
-			cell.setOwner(Constants.OWNER_BY_US);
-			cell.incrementNoOfTimesVisited();
 			putCell(p, cell);
 		}
+
+		// Update Visitation
+		cell.setVisited(true);
+		cell.setLastTurnVisited(turn);
+		cell.incrementNoOfTimesVisited();
+
+		// Update Ownership
+		if (cell.getOwner() != Constants.OWNER_BY_US) {
+			if (isFootPrintPresent) {
+				cell.setOwner(Constants.OWNED_BY_THEM);
+			} else {
+				cell.setOwner(Constants.OWNER_BY_US);
+				cell.setFirstTurnVisited(turn);
+			}
+		}
+
+		checkAndUpdateXSeen(p.x);
+		checkAndUpdateYSeen(p.y);
+		Grid.computeScore(cell, this);
 	}
 
 	/**
@@ -119,6 +125,10 @@ public class Grid {
 			}
 			putCell(p, cell);
 		}
+
+		checkAndUpdateXSeen(p.x);
+		checkAndUpdateYSeen(p.y);
+		Grid.computeScore(cell, this);
 	}
 
 	/**
@@ -127,7 +137,7 @@ public class Grid {
 	 * @param cell_
 	 * @param grid_
 	 */
-	public void computeScore(Cell cell_, Grid grid_) {
+	public static void computeScore(Cell cell_, Grid grid_) {
 		if (cell_.isImpassable()) {
 			cell_.setScore(-100);
 		} else {
@@ -148,7 +158,7 @@ public class Grid {
 						break;
 
 					case Constants.TERRAIN_WATER:
-						score += 3;
+						score += Constants.RANGE;
 						break;
 
 					case Constants.TERRAIN_MOUNTAIN:
@@ -171,6 +181,7 @@ public class Grid {
 						break;
 					}
 				} else {
+					// Unseen cell +2
 					score += 2;
 				}
 
@@ -189,7 +200,7 @@ public class Grid {
 						break;
 
 					case Constants.TERRAIN_WATER:
-						score += 3;
+						score += Constants.RANGE;
 						break;
 
 					case Constants.TERRAIN_MOUNTAIN:
@@ -217,8 +228,70 @@ public class Grid {
 
 			}
 
+			
+			
 			cell_.setScore(score);
 		}
 
+	}
+
+	/**
+	 * @return the maxXSeen
+	 */
+	public int getMaxXSeen() {
+		return maxXSeen;
+	}
+
+	/**
+	 * Sees if X seen is greater than or lesser than current knowledge and
+	 * updates
+	 * 
+	 * @param xSeen_
+	 *            the maxXSeen to set
+	 */
+	public void checkAndUpdateXSeen(int xSeen_) {
+		if (xSeen_ < minXSeen) {
+			minXSeen = xSeen_;
+
+		} else if (xSeen_ > maxXSeen) {
+			maxXSeen = xSeen_;
+		}
+	}
+
+	/**
+	 * @return the maxYSeen
+	 */
+	public int getMaxYSeen() {
+		return maxYSeen;
+	}
+
+	/**
+	 * Sees if Y seen is greater than or lesser than current knowledge and
+	 * updates
+	 * 
+	 * @param ySeen_
+	 *            the maxYSeen to set
+	 */
+	public void checkAndUpdateYSeen(int ySeen_) {
+		if (ySeen_ < minYSeen) {
+			minYSeen = ySeen_;
+
+		} else if (ySeen_ > maxYSeen) {
+			maxYSeen = ySeen_;
+		}
+	}
+
+	/**
+	 * @return the minYSeen
+	 */
+	public int getMinYSeen() {
+		return minYSeen;
+	}
+
+	/**
+	 * @return the minXtSeen
+	 */
+	public int getMinXtSeen() {
+		return minXSeen;
 	}
 }

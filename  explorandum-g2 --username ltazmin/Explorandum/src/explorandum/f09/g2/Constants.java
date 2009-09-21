@@ -8,7 +8,7 @@ import explorandum.Move;
  * @author sharadh
  *
  */
-public interface Constants {
+public class Constants {
 
 	public static int[] VERTEX_NEIGHBORS = { Move.NORTHWEST, Move.NORTHEAST,
 			Move.SOUTHEAST, Move.SOUTHWEST };
@@ -38,4 +38,8 @@ public interface Constants {
 	//Scoring Parameters
 	public static final int FOOTPRINT_HISTORY_THRESHOLD = 5;
 	public static final int CLAIM_HISTORY_THRESHOLD = 10;
+	
+	public static int RANGE = 0;
+	public static int NO_OF_ROUNDS = 0;
+	public static int NO_OF_EXPLORERS = 0;
 }
