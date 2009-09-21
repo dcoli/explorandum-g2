@@ -49,6 +49,29 @@ public class Grid {
 	}
 
 	/**
+	 * Returns a cell indexed as an offset from a given point
+	 * 
+	 * @param p
+	 * @param dx
+	 * @param dy
+	 * @return
+	 */
+	public Cell getCell(Point p, int dx, int dy) {
+		return getCell(p.x + dx, p.y + dy);
+	}
+
+	/**
+	 * Returns the cell represented by co-ordiantes
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public Cell getCell(int x, int y) {
+		return gridMap.get(new Point(x, y));
+	}
+
+	/**
 	 * Puts the cell c into the grid, indexed by point p
 	 * 
 	 * @param p
@@ -82,17 +105,20 @@ public class Grid {
 		}
 
 		// Update Visitation
-		cell.setVisited(true);
 		cell.setLastTurnVisited(turn);
 		cell.incrementNoOfTimesVisited();
 
+		if (!cell.isVisited()) {
+			cell.setFirstTurnVisited(turn);
+			cell.setVisited(true);
+		}
 		// Update Ownership
 		if (cell.getOwner() != Constants.OWNER_BY_US) {
 			if (isFootPrintPresent) {
 				cell.setOwner(Constants.OWNED_BY_THEM);
 			} else {
 				cell.setOwner(Constants.OWNER_BY_US);
-				cell.setFirstTurnVisited(turn);
+
 			}
 		}
 
@@ -107,10 +133,12 @@ public class Grid {
 	 * @param p
 	 * @param terrain
 	 * @param isExplorerSeen
+	 * @return true if seen first time
 	 */
-	public void updateSeenCellInformation(Point p, int terrain,
+	public boolean updateSeenCellInformation(Point p, int terrain,
 			boolean isExplorerSeen) {
 		Cell cell = getCell(p);
+		boolean retVal = false;
 		if (cell != null) {
 
 			if (!cell.isVisited() && isExplorerSeen) {
@@ -124,11 +152,13 @@ public class Grid {
 				cell.setOwner(Constants.OWNED_BY_THEM);
 			}
 			putCell(p, cell);
+			retVal = true;
 		}
 
 		checkAndUpdateXSeen(p.x);
 		checkAndUpdateYSeen(p.y);
 		Grid.computeScore(cell, this);
+		return retVal;
 	}
 
 	/**
@@ -148,9 +178,9 @@ public class Grid {
 
 			// Edge Neighbours
 			for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
-				Cell c = grid_.getCell(new Point(px
-						+ Constants.EDGE_NEIGHBOR_OFFSETS[i][0], py
-						+ Constants.EDGE_NEIGHBOR_OFFSETS[i][1]));
+				Cell c = grid_.getCell(cell_.getPoint(),
+						Constants.EDGE_NEIGHBOR_OFFSETS[i][0],
+						Constants.EDGE_NEIGHBOR_OFFSETS[i][1]);
 				if (c != null) {
 					switch (c.getTerrain()) {
 					case Constants.TERRAIN_LAND:
@@ -189,9 +219,9 @@ public class Grid {
 
 			// Vertex Neighbours
 			for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
-				Cell c = grid_.getCell(new Point(px
-						+ Constants.VERTEX_NEIGHBOR_OFFSETS[i][0], py
-						+ Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]));
+				Cell c = grid_.getCell(cell_.getPoint(),
+						Constants.VERTEX_NEIGHBOR_OFFSETS[i][0],
+						Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
 
 				if (c != null) {
 					switch (c.getTerrain()) {
@@ -305,24 +335,94 @@ public class Grid {
 
 	/**
 	 * Returns random points chosen
+	 * 
 	 * @param current_
 	 * @return
 	 */
 	private Point[] getRandomTargets(Point current_) {
+
+		Point[] p = new Point[8];
+		int xSize = maxXSeen - minXSeen;
+		int ySize = maxYSeen - minYSeen;
+		for (int i = 0; i < p.length; i++) {
+			int px = (int) (Math.random() * xSize - minXSeen);
+			int py = (int) (Math.random() * ySize - minYSeen);
+			p[i] = new Point(px, py);
+		}
 		return new Point[] {};
 	}
 
 	/**
-	 * Evaluates random open targets by calling getRandomTargets()
-	 * and chooses the one which has most undiscovered neighbors and unvisited
-	 * neighbors
+	 * Evaluates random open targets by calling getRandomTargets() and chooses
+	 * the one which has most undiscovered neighbors and unvisited neighbors
 	 * 
-	 * Eventually perhaps also one which will also help pick up most cells
-	 * on the way
+	 * Eventually perhaps also one which will also help pick up most cells on
+	 * the way
+	 * 
 	 * @param current_
 	 * @return
 	 */
 	public Point getOpenRandomTarget(Point current_) {
-		return null;
+		Point[] targets = getRandomTargets(current_);
+
+		int maxOpennessScoreIndex = -1;
+		int maxOpennessScore = Integer.MIN_VALUE;
+		for (int i = 0; i < targets.length; i++) {
+			int score = getOpennessScore(targets[i]);
+			if (maxOpennessScore > score) {
+				maxOpennessScore = score;
+				maxOpennessScoreIndex = i;
+			}
+		}
+
+		return targets[maxOpennessScoreIndex];
+	}
+
+	public int getOpennessScore(Point p) {
+		Cell curr = getCell(p);
+		int score = 0;
+		if (curr == null) {
+			score += 10;
+		} else {
+			if (curr.isVisited() || curr.isImpassable()
+					|| curr.getOwner() == Constants.OWNED_BY_THEM) {
+				return 0;
+			}
+		}
+
+		int px = p.x;
+		int py = p.y;
+
+		// Edge Neighbours
+		for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
+			Cell c = getCell(p, Constants.EDGE_NEIGHBOR_OFFSETS[i][0],
+					Constants.EDGE_NEIGHBOR_OFFSETS[i][1]);
+			if (c != null) {
+				if (!c.isVisited()) {
+					score += 3;
+				}
+			} else {
+				// Unseen cell
+				score += 5;
+			}
+
+		}
+
+		// Edge Neighbours
+		for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
+			Cell c = getCell(p, Constants.VERTEX_NEIGHBOR_OFFSETS[i][0],
+					Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
+
+			if (c != null) {
+				if (!c.isVisited()) {
+					score += 3;
+				}
+			} else {
+				score += 5;
+			}
+
+		}
+
+		return score;
 	}
 }
