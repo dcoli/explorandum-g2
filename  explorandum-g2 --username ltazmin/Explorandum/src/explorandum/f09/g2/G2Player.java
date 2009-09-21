@@ -82,7 +82,6 @@ public class G2Player implements Player {
 	}
 
 	public String name() throws Exception {
-		// TODO Auto-generated method stub
 		return "Lumbering Troglodyte";
 	}
 
