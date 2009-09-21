@@ -160,6 +160,37 @@ public class Grid {
 		Grid.computeScore(cell, this);
 		return retVal;
 	}
+	
+	/**
+	 * Considers neighbor information to assign a score to a cell
+	 * @param p
+	 * @author colin
+	 */
+/* written before sharadh posted his, does about the same thing
+ 	public int updateCellScores( Point p ) {
+		int v[][] = Constants.VERTEX_NEIGHBOR_OFFSETS;
+		int e[][] = Constants.EDGE_NEIGHBOR_OFFSETS;
+		for (int vi=0; vi < v[0].length; vi++) {
+			Cell neighbor = getCell(new Point(v[vi][0],v[vi][1]));
+			Cell target = getCell(p);
+			if (neighbor != null) {
+				target.score += (neighbor.getTerrain() == Constants.TERRAIN_WATER)? WATER_SCORE: 0;
+				target.score += (neighbor.getTerrain() == Constants.TERRAIN_MOUNTAIN)? MOUNTAIN_SCORE: 0;
+				target.score += (neighbor.isVisited())? 0: UNVISITED_SCORE;
+			}
+		}
+		for (int ei=0; ei < e[0].length; ei++) {
+			Cell neighbor = getCell(new Point(e[ei][0],e[ei][1]));
+			Cell target = getCell(p);
+			if (neighbor != null) {
+				target.score += (neighbor.getTerrain() == Constants.TERRAIN_WATER)? WATER_SCORE: 0;
+				target.score += (neighbor.getTerrain() == Constants.TERRAIN_MOUNTAIN)? MOUNTAIN_SCORE: 0;
+				target.score += (neighbor.isVisited())? 0: UNVISITED_SCORE;
+			}
+		}
+		return 0;
+	}	
+ */
 
 	/**
 	 * Computes the score of this cell based on various parameters
