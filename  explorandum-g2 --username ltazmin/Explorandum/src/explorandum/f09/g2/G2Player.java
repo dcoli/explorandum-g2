@@ -17,16 +17,16 @@ import explorandum.Player;
  */
 public class G2Player implements Player {
 
-	private int explorerID;
-	private Logger log;
+	private int _explorerID;
+	private Logger _log;
 
-	private Grid grid;
+	private Grid _grid;
 
-	private ArrayList<MoveHistory> history;
+	private ArrayList<PastMove> _pastMoves;
 
 	public G2Player() {
-		grid = new Grid();
-		history = new ArrayList<MoveHistory>();
+		_grid = new Grid();
+		_pastMoves = new ArrayList<PastMove>();
 	}
 
 	public Color color() throws Exception {
@@ -37,17 +37,21 @@ public class G2Player implements Player {
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
 
+		// Put move in pastMoves list
+		_pastMoves.add(0, new PastMove(currentLocation_, offsets_,
+				hasExplorer_, visibleExplorers_, time_, StepStatus));
+
 		// Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
-			grid.updateSeenCellInformation(offsets_[i], terrain_[i],
+			_grid.updateSeenCellInformation(offsets_[i], terrain_[i],
 					hasExplorer_[i]);
 		}
 
 		// Update the visited cell information
-		grid.updateVisitedCellInformation(currentLocation_, time_, StepStatus,
+		_grid.updateVisitedCellInformation(currentLocation_, time_, StepStatus,
 				false);
 
-		Move m = Helper.getMoveFrom(currentLocation_, grid);
+		Move m = Helper.getMoveFrom(currentLocation_, _grid);
 		System.out.println(m);
 
 		return m;
@@ -63,14 +67,22 @@ public class G2Player implements Player {
 			int range_, Logger log_, Random rand_) {
 
 		// Update game variables
-		explorerID = explorerID_;
+		_explorerID = explorerID_;
+		_log = log_;
+		
+		/**
+		 * @author sharadh
+		 * I know these are not constants .. I just wanted them to 
+		 * easily accessible for now
+		 */
 		Constants.NO_OF_ROUNDS = rounds_;
 		Constants.NO_OF_EXPLORERS = explorers_;
 		Constants.RANGE = range_;
-		log = log_;
+
 
 		// Clear previous information
-		grid.clear();
+		_grid.clear();
+		_pastMoves.clear();
 	}
 
 }
