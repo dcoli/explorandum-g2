@@ -43,7 +43,7 @@ public class G2Player implements Player {
 		// Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
 			if(_grid.updateSeenCellInformation(offsets_[i], terrain_[i],
-					hasExplorer_[i])){
+					hasExplorer_[i],currentLocation_)){
 				newSeenCellCount++;
 			}
 		}
@@ -55,6 +55,10 @@ public class G2Player implements Player {
 		// Put move in pastMoves list
 		_pastMoves.add(0, new PastMove(currentLocation_, offsets_,
 				hasExplorer_, visibleExplorers_, time_, StepStatus,newSeenCellCount));
+		
+		if(_pastMoves.size() > Constants.LONG_TERM_HISTORY_LENGTH){
+			_pastMoves.remove(Constants.LONG_TERM_HISTORY_LENGTH -1);
+		}
 
 		
 		// System.out.println("Here 1");
