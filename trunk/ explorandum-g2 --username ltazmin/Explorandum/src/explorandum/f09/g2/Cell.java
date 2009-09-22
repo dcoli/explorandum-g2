@@ -159,14 +159,14 @@ public class Cell implements Comparable<Cell> {
 	public String toString() {
 		return "[ ( " + p.x + "," + p.y + ") , Terrain =" + terrain + " ]";
 	}
-	
+
 	/**
 	 * Implement comparable method
 	 */
 	public int compareTo(Cell c) {
-		
+
 		return score - c.getScore();
-		
+
 	}
 
 	/**
@@ -261,16 +261,16 @@ public class Cell implements Comparable<Cell> {
 	 * @param c
 	 * @return
 	 */
-	public int getDistanceFrom(Cell c){
-		return Math.abs(getPoint().x - c.getPoint().x) +Math.abs(getPoint().y - c.getPoint().y);
+	public double getDistanceFrom(Cell c) {
+		return getDistanceFrom(c.getPoint());
 	}
-	
+
 	/**
 	 * 
 	 * @param p
 	 * @return
 	 */
-	public int getDistanceFrom(Point p){
-		return Math.abs(getPoint().x - p.x) +Math.abs(getPoint().y - p.y);
+	public double getDistanceFrom(Point p_) {
+		return Math.sqrt(Math.pow(p_.x - p.x, 2) + Math.pow(p_.y - p.y, 2));
 	}
 }
