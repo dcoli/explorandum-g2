@@ -24,7 +24,7 @@ public class Constants {
 			{ 1, 0 }, { 0, 1 }, { 0, -1 } };
 
 	public static final int OWNED_BY_UNKNOWN = 0;
-	public static final int OWNER_BY_US = 1;
+	public static final int OWNED_BY_US = 1;
 	public static final int OWNED_BY_THEM = 2;
 
 	public static final int TERRAIN_UNKNOWN = -1;
@@ -47,17 +47,15 @@ public class Constants {
 	public static boolean TARGETTING_MODE_ON = false;
 
 	public static int getFootPrintThreshold(int currTurn, int totalNoOfTurns) {
-//		if(currTurn <= 0.4 * totalNoOfTurns){
-//			return 10;
-//		}
-//		else if(currTurn <= 0.7 * totalNoOfTurns ){
-//			return 5;
-//		}
-//		else{
-//			return 3;
-//		}
+		if (currTurn <= 0.4 * totalNoOfTurns) {
+			return 5;
+		} else if (currTurn <= 0.7 * totalNoOfTurns) {
+			return 7;
+		} else {
+			return 10;
+		}
 		
-		return 5;
+		
 	}
 
 	public static int getClaimThreshold(int currTurn, int totalNoOfTurns) {
