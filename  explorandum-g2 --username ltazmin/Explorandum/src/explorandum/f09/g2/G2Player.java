@@ -61,11 +61,10 @@ public class G2Player implements Player {
 		}
 
 		
-		// System.out.println("Here 1");
-		HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_,
-				Constants.NO_OF_ROUNDS);
+//		HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_,
+//				Constants.NO_OF_ROUNDS);
 
-		// System.out.println("Here 3");
+		// //System.out.println("Here 3");
 		if (Constants.TARGETTING_MODE_ON) {
 			evaluateTargetting(currentLocation_);
 			Move m = Helper.getNextMoveTowardsTarget(currentLocation_, _grid,
@@ -73,13 +72,13 @@ public class G2Player implements Player {
 			if (m != null) {
 				return m;
 			} else {
-				//System.out.println(":(1");
+				////System.out.println(":(1");
 				stopTargetting();
 			}
 		}
-		// System.out.println("Here 4");
+		// //System.out.println("Here 4");
 		Move m = Helper.getMoveFrom(currentLocation_, _grid);
-		//System.out.println(m);
+		////System.out.println(m);
 
 		return m;
 
@@ -103,7 +102,7 @@ public class G2Player implements Player {
 		Constants.NO_OF_ROUNDS = rounds_;
 		Constants.NO_OF_EXPLORERS = explorers_;
 		Constants.RANGE = range_;
-
+		Constants.TARGETTING_MODE_ON = false;
 		// Clear previous information
 		_grid.clear();
 		_pastMoves.clear();
@@ -114,7 +113,7 @@ public class G2Player implements Player {
 	 */
 	public void stopTargetting() {
 
-		//System.out.println("Stopping Targetting");
+		////System.out.println("Stopping Targetting");
 		Constants.TARGETTING_MODE_ON = false;
 		_targetInfo = null;
 	}
@@ -126,23 +125,23 @@ public class G2Player implements Player {
 	 * @param target_
 	 */
 	public void startTargetting(Point currentLocation_, Point target_) {
-		//System.out.println("Started Targetting");
+		////System.out.println("Started Targetting");
 		Constants.TARGETTING_MODE_ON = true;
 		_targetInfo = new TargetInfo(target_, currentLocation_);
-		//System.out.println(currentLocation_);
-		//System.out.println(target_);
+		////System.out.println(currentLocation_);
+		////System.out.println(target_);
 	}
 
 	public void evaluateTargetting(Point currentLocation_) {
 		if (currentLocation_.equals(_targetInfo.getTarget())) {
 
-			// System.out.println(":(2");
+			// //System.out.println(":(2");
 			stopTargetting();
 		}
 		_targetInfo.incrementMoveCount();
 		if (_targetInfo.getMoveCount() >= _targetInfo.getMaxMoveAllowed()) {
 
-			// System.out.println(":(3");
+			// //System.out.println(":(3");
 			stopTargetting();
 		}
 	}
