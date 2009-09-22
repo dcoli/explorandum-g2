@@ -30,11 +30,11 @@ public class Cell implements Comparable<Cell> {
 	private int terrain = Constants.TERRAIN_UNKNOWN;
 	private int whoOwns = Constants.OWNED_BY_UNKNOWN;
 	private boolean isVisited = false;
-	private int turnFirstVisited = -1;
-	private int turnLastVisited = -1;
+	private int turnFirstVisited = 0;
+	private int turnLastVisited = 0;
 	private int noOfTimesVisited = 0;
-
-	private int score = 0;
+	private int minDistanceSeenFrom = Integer.MAX_VALUE;
+	private double score = 0;
 
 	/**
 	 * Gets the first turn this cell was visited
@@ -165,7 +165,7 @@ public class Cell implements Comparable<Cell> {
 	 */
 	public int compareTo(Cell c) {
 
-		return score - c.getScore();
+		return (int) (score - c.getScore());
 
 	}
 
@@ -244,7 +244,7 @@ public class Cell implements Comparable<Cell> {
 	/**
 	 * @return the score
 	 */
-	public int getScore() {
+	public double getScore() {
 		return score;
 	}
 
@@ -252,7 +252,7 @@ public class Cell implements Comparable<Cell> {
 	 * @param score_
 	 *            the score to set
 	 */
-	public void setScore(int score_) {
+	public void setScore(double score_) {
 		score = score_;
 	}
 
@@ -272,5 +272,22 @@ public class Cell implements Comparable<Cell> {
 	 */
 	public double getDistanceFrom(Point p_) {
 		return Math.sqrt(Math.pow(p_.x - p.x, 2) + Math.pow(p_.y - p.y, 2));
+	}
+
+	/**
+	 * @return the minDistanceSeenFrom
+	 */
+	public int getMinDistanceSeenFrom() {
+		return minDistanceSeenFrom;
+	}
+
+	/**
+	 * @param minDistanceSeenFrom_
+	 *            the minDistanceSeenFrom to set
+	 */
+	public void updateMinDistanceSeenFrom(int minDistanceSeenFrom_) {
+		if (minDistanceSeenFrom_ < minDistanceSeenFrom) {
+			minDistanceSeenFrom = minDistanceSeenFrom_;
+		}
 	}
 }
