@@ -47,7 +47,10 @@ public class Constants {
 	public static boolean TARGETTING_MODE_ON = false;
 
 	public static int getFootPrintThreshold(int currTurn, int totalNoOfTurns) {
-		if (currTurn <= 0.4 * totalNoOfTurns) {
+		if (currTurn <= 0.2 * totalNoOfTurns) {
+			return 10;
+		}
+		else if (currTurn <= 0.4 * totalNoOfTurns) {
 			return 5;
 		} else if (currTurn <= 0.7 * totalNoOfTurns) {
 			return 7;

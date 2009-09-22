@@ -2,6 +2,7 @@ package explorandum.f09.g2;
 
 import java.awt.Point;
 import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * Class for the Grid/Map
@@ -14,7 +15,8 @@ public class Grid {
 	/**
 	 * Hashmap with key as Point and value as Cell
 	 */
-	private HashMap<Point, Cell> gridMap;
+	private HashMap<Point, Cell> _gridMap;
+	private HashSet<Point> _unVisitedCells;
 
 	/**
 	 * Counters to understand map size
@@ -28,14 +30,15 @@ public class Grid {
 	 * Private Constructor
 	 */
 	public Grid() {
-		gridMap = new HashMap<Point, Cell>();
+		_gridMap = new HashMap<Point, Cell>();
+		_unVisitedCells = new HashSet<Point>();
 	}
 
 	/**
 	 * Clears all present information
 	 */
 	public void clear() {
-		gridMap.clear();
+		_gridMap.clear();
 	}
 
 	/**
@@ -45,7 +48,7 @@ public class Grid {
 	 * @return
 	 */
 	public Cell getCell(Point p) {
-		return gridMap.get(p);
+		return _gridMap.get(p);
 	}
 
 	/**
@@ -68,7 +71,7 @@ public class Grid {
 	 * @return
 	 */
 	public Cell getCell(int x, int y) {
-		return gridMap.get(new Point(x, y));
+		return _gridMap.get(new Point(x, y));
 	}
 
 	/**
@@ -78,7 +81,7 @@ public class Grid {
 	 * @param c
 	 */
 	public void putCell(Point p, Cell c) {
-		gridMap.put(p, c);
+		_gridMap.put(p, c);
 	}
 
 	/*
@@ -111,13 +114,17 @@ public class Grid {
 		if (!cell.isVisited()) {
 			cell.setFirstTurnVisited(turn);
 			cell.setVisited(true);
+			cell.updateMinDistanceSeenFrom(0);
+			
+			//Remove from unvisited cells
+			_unVisitedCells.remove(p);
 		}
 		// Update Ownership
-		if (cell.getOwner() != Constants.OWNER_BY_US) {
+		if (cell.getOwner() != Constants.OWNED_BY_US) {
 			if (isFootPrintPresent) {
 				cell.setOwner(Constants.OWNED_BY_THEM);
 			} else {
-				cell.setOwner(Constants.OWNER_BY_US);
+				cell.setOwner(Constants.OWNED_BY_US);
 
 			}
 		}
@@ -125,6 +132,23 @@ public class Grid {
 		checkAndUpdateXSeen(p.x);
 		checkAndUpdateYSeen(p.y);
 		Grid.computeScore(cell, this);
+
+		// Edge Neighbours
+		for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
+			Cell c = getCell(cell.getPoint(),
+					Constants.EDGE_NEIGHBOR_OFFSETS[i][0],
+					Constants.EDGE_NEIGHBOR_OFFSETS[i][1]);
+
+			Grid.computeScore(c, this);
+		}
+
+		// Vertex Neighbours
+		for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
+			Cell c = getCell(cell.getPoint(),
+					Constants.VERTEX_NEIGHBOR_OFFSETS[i][0],
+					Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
+			Grid.computeScore(c, this);
+		}
 	}
 
 	/**
@@ -136,7 +160,7 @@ public class Grid {
 	 * @return true if seen first time
 	 */
 	public boolean updateSeenCellInformation(Point p, int terrain,
-			boolean isExplorerSeen) {
+			boolean isExplorerSeen, Point currentLocation) {
 		Cell cell = getCell(p);
 		boolean retVal = false;
 		if (cell != null) {
@@ -148,49 +172,55 @@ public class Grid {
 		} else {
 			cell = new Cell(p);
 			cell.setTerrain(terrain);
+			if (terrain != Constants.TERRAIN_LAND) {
+				int dx = currentLocation.x - p.x;
+				int dy = currentLocation.y - p.y;
+				if (cell.getDistanceFrom(currentLocation) < 2) {
+					// cell.setOwner(Constants.OWNED_BY_US);
+				}
+			}
 			if (isExplorerSeen) {
 				cell.setOwner(Constants.OWNED_BY_THEM);
 			}
 			putCell(p, cell);
 			retVal = true;
+			
+			_unVisitedCells.add(p);
 		}
 
+
+		cell.updateMinDistanceSeenFrom((int)cell.getDistanceFrom(currentLocation));
+		
 		checkAndUpdateXSeen(p.x);
 		checkAndUpdateYSeen(p.y);
 		Grid.computeScore(cell, this);
 		return retVal;
 	}
-	
+
 	/**
 	 * Considers neighbor information to assign a score to a cell
+	 * 
 	 * @param p
 	 * @author colin
 	 */
-/* written before sharadh posted his, does about the same thing
- 	public int updateCellScores( Point p ) {
-		int v[][] = Constants.VERTEX_NEIGHBOR_OFFSETS;
-		int e[][] = Constants.EDGE_NEIGHBOR_OFFSETS;
-		for (int vi=0; vi < v[0].length; vi++) {
-			Cell neighbor = getCell(new Point(v[vi][0],v[vi][1]));
-			Cell target = getCell(p);
-			if (neighbor != null) {
-				target.score += (neighbor.getTerrain() == Constants.TERRAIN_WATER)? WATER_SCORE: 0;
-				target.score += (neighbor.getTerrain() == Constants.TERRAIN_MOUNTAIN)? MOUNTAIN_SCORE: 0;
-				target.score += (neighbor.isVisited())? 0: UNVISITED_SCORE;
-			}
-		}
-		for (int ei=0; ei < e[0].length; ei++) {
-			Cell neighbor = getCell(new Point(e[ei][0],e[ei][1]));
-			Cell target = getCell(p);
-			if (neighbor != null) {
-				target.score += (neighbor.getTerrain() == Constants.TERRAIN_WATER)? WATER_SCORE: 0;
-				target.score += (neighbor.getTerrain() == Constants.TERRAIN_MOUNTAIN)? MOUNTAIN_SCORE: 0;
-				target.score += (neighbor.isVisited())? 0: UNVISITED_SCORE;
-			}
-		}
-		return 0;
-	}	
- */
+	/*
+	 * written before sharadh posted his, does about the same thing public int
+	 * updateCellScores( Point p ) { int v[][] =
+	 * Constants.VERTEX_NEIGHBOR_OFFSETS; int e[][] =
+	 * Constants.EDGE_NEIGHBOR_OFFSETS; for (int vi=0; vi < v[0].length; vi++) {
+	 * Cell neighbor = getCell(new Point(v[vi][0],v[vi][1])); Cell target =
+	 * getCell(p); if (neighbor != null) { target.score +=
+	 * (neighbor.getTerrain() == Constants.TERRAIN_WATER)? WATER_SCORE: 0;
+	 * target.score += (neighbor.getTerrain() == Constants.TERRAIN_MOUNTAIN)?
+	 * MOUNTAIN_SCORE: 0; target.score += (neighbor.isVisited())? 0:
+	 * UNVISITED_SCORE; } } for (int ei=0; ei < e[0].length; ei++) { Cell
+	 * neighbor = getCell(new Point(e[ei][0],e[ei][1])); Cell target =
+	 * getCell(p); if (neighbor != null) { target.score +=
+	 * (neighbor.getTerrain() == Constants.TERRAIN_WATER)? WATER_SCORE: 0;
+	 * target.score += (neighbor.getTerrain() == Constants.TERRAIN_MOUNTAIN)?
+	 * MOUNTAIN_SCORE: 0; target.score += (neighbor.isVisited())? 0:
+	 * UNVISITED_SCORE; } } return 0; }
+	 */
 
 	/**
 	 * Computes the score of this cell based on various parameters
@@ -205,7 +235,7 @@ public class Grid {
 
 			int px = cell_.getPoint().x;
 			int py = cell_.getPoint().y;
-			int score = 0;
+			double score = 0;
 
 			// Edge Neighbours
 			for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
@@ -220,20 +250,22 @@ public class Grid {
 
 					case Constants.TERRAIN_WATER:
 						score += Constants.RANGE;
+						//score += 3;
 						break;
 
 					case Constants.TERRAIN_MOUNTAIN:
 						score += 2;
 						break;
 					}
-					score += 1;
+
+					//score += 1;
 
 					switch (c.getOwner()) {
 					case Constants.OWNED_BY_THEM:
 						score -= 1;
 						break;
 
-					case Constants.OWNER_BY_US:
+					case Constants.OWNED_BY_US:
 						score -= 1;
 						break;
 
@@ -241,9 +273,12 @@ public class Grid {
 						score += 2;
 						break;
 					}
+
 				} else {
 					// Unseen cell +2
-					score += 2;
+					//score += 4;
+
+					score += Constants.RANGE;
 				}
 
 			}
@@ -262,6 +297,7 @@ public class Grid {
 
 					case Constants.TERRAIN_WATER:
 						score += Constants.RANGE;
+						//score += 3;
 						break;
 
 					case Constants.TERRAIN_MOUNTAIN:
@@ -274,7 +310,7 @@ public class Grid {
 						score -= 1;
 						break;
 
-					case Constants.OWNER_BY_US:
+					case Constants.OWNED_BY_US:
 						score -= 1;
 						break;
 
@@ -284,11 +320,15 @@ public class Grid {
 					}
 
 				} else {
-					score += 2;
+					//score += 3;
+					score += Constants.RANGE;
 				}
 
 			}
 
+			
+			score+= Constants.RANGE - cell_.getMinDistanceSeenFrom();
+			
 			cell_.setScore(score);
 		}
 
@@ -350,7 +390,7 @@ public class Grid {
 	/**
 	 * @return the minXtSeen
 	 */
-	public int getMinXtSeen() {
+	public int getMinXSeen() {
 		return minXSeen;
 	}
 
@@ -414,11 +454,9 @@ public class Grid {
 		int score = 0;
 		if (curr == null) {
 			score += 10;
-		} else {
-			if (curr.isVisited() || curr.isImpassable()
-					|| curr.getOwner() == Constants.OWNED_BY_THEM) {
-				return 0;
-			}
+		} else if (curr.isImpassable()) {
+			return 0;
+
 		}
 
 		int px = p.x;
@@ -429,7 +467,7 @@ public class Grid {
 			Cell c = getCell(p, Constants.EDGE_NEIGHBOR_OFFSETS[i][0],
 					Constants.EDGE_NEIGHBOR_OFFSETS[i][1]);
 			if (c != null) {
-				if (!c.isVisited()) {
+				if (c.getTerrain() == Constants.TERRAIN_LAND && !c.isVisited()) {
 					score += 3;
 				}
 			} else {
@@ -445,7 +483,7 @@ public class Grid {
 					Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
 
 			if (c != null) {
-				if (!c.isVisited()) {
+				if (c.getTerrain() == Constants.TERRAIN_LAND && !c.isVisited()) {
 					score += 3;
 				}
 			} else {
@@ -454,6 +492,10 @@ public class Grid {
 
 		}
 
+		if (curr.isVisited()) {
+			score += 5 * (1 - curr.getLastTurnVisited() * 1.0
+					/ Constants.NO_OF_ROUNDS);
+		}
 		return score;
 	}
 }
