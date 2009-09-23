@@ -1,5 +1,7 @@
 package explorandum.f09.g2;
 
+
+
 import java.awt.Point;
 import java.util.ArrayList;
 
@@ -23,36 +25,73 @@ public class Helper {
 	 *            Grid of the game
 	 * @return optimal cell
 	 */
-	public static Cell getOptimalCellDestination(Grid g, Point startingPoint) {
+	public static Cell getTargetedCell(Point startingPoint, Grid g) {
 
-		Cell c = g.getCell(startingPoint);
+		Cell startingCell = g.getCell(startingPoint);
+		System.out.println(startingCell + " <--- START");
+		
 		Queue<Cell> neighborCells = new Queue<Cell>();
 		BinaryHeap<Cell> candidateCells = new BinaryHeap<Cell>();
+		
+		// to prevent duplicates after dequeueing
+		ArrayList<Cell> dequeuedCells = new ArrayList<Cell>();
 
 		int howFarAway = 2 * Constants.RANGE; // how far from current cell to
 												// look for a target
 
-		// evaluate neighbors within a range
-		for (int i = 0; i < howFarAway; i++) {
-
-			// add a set of neighbors if the cell isn't null and is traversable
-			if (c != null) {
-				if (!c.isImpassable()) {
-
-					neighborCells = addNeighbors(c, g, neighborCells);
-				}
-			}
-
-			c = neighborCells.dequeue();
-
-			// evaluate that cell
+		int scopeCount = 0;
+		int count = -1; // tracks how many cells are dequeued
+		int prevNeighborCellsCount = 0;
+		int numNeighborCells = 0;
+		
+		neighborCells.enqueue(startingCell);
+		
+		// evaluate neighbors within a certain range
+		while (scopeCount < howFarAway) {
+			
+			Cell c = neighborCells.dequeue(); // get cell
+			dequeuedCells.add(c);
+			count++; // increase
+			
+			// (re-)calculate score
 			Grid.computeScore(c, g);
-			candidateCells.insert(c);
-
+			System.out.println(c + " SCORE " + c.getScore());
+			
+			// add its neighbors
+			numNeighborCells += addNeighbors(c, g, neighborCells, dequeuedCells);
+			
+			// no valid neighbors then add to heap
+			if (numNeighborCells < 1) {
+				candidateCells.insert(c);
+				System.out.println("Just added to heap (0): " + c + " SCORE " + c.getScore());
+			}
+		
+			// keep track of how many sets of neighbors we add to queue
+			if (count == prevNeighborCellsCount) {
+				scopeCount++;
+				prevNeighborCellsCount = numNeighborCells;
+				numNeighborCells = 0;
+				count = 0;
+			}
+				
+		}
+		
+		// add the remaining cells to heap
+		while (!neighborCells.isEmpty()) {
+			Cell nc = neighborCells.dequeue();
+			if (!nc.isVisited()) {
+				candidateCells.insert(nc);
+			}
+			System.out.println("Just added to heap (1): " + nc + " SCORE " + nc.getScore());
 		}
 
-		// Pick cell with highest score
-		Cell destinationCell = candidateCells.findMax();
+		candidateCells.printHeap();
+		//System.exit(0);
+		
+		// pick cell with highest score
+		Cell destinationCell = ((BinaryHeap<Cell>) candidateCells).findMax();
+		
+		System.out.println("Now targetting "+destinationCell);
 
 		return destinationCell;
 
@@ -65,26 +104,75 @@ public class Helper {
 	 *            the cell
 	 * @param g
 	 * @param cells
-	 * @return the queue with added neighbors
+	 * @return number of added cells
 	 */
-	private static Queue<Cell> addNeighbors(Cell c, Grid g, Queue<Cell> cells) {
+	private static int addNeighbors(Cell c, Grid grid_, Queue<Cell> cells, ArrayList<Cell> prevCells) {
 
-		Point point = c.getPoint();
+		int retValue = 0;
 
-		// Enqueue immediate neighbors
+		// Enqueue edge neighbors
 		for (int i = 0; i < Constants.EDGE_NEIGHBOR_OFFSETS.length; i++) {
+			Cell neighborCell = grid_.getCell(c.getPoint(),
+					Constants.EDGE_NEIGHBOR_OFFSETS[i][0],
+					Constants.EDGE_NEIGHBOR_OFFSETS[i][1]);
 
-			Cell neighborCell = g.getCell(new Point(point.x
-					+ Constants.EDGE_NEIGHBOR_OFFSETS[i][0], point.y
-					+ Constants.EDGE_NEIGHBOR_OFFSETS[i][1]));
+			// limitation in keeping score of null prevents its candidacy (let's ponder this)
+			// if (neighborCell == null) {
+			//	Point p = new Point();
+			//	Cell nullCell = new Cell(p);
+			//}
+			
+			// if the cells is not already in queue
+			// and is land, add to queue
+			if (neighborCell != null) {
+				if (!prevCells.contains(neighborCell)){
+					if (!cells.contains(neighborCell) && !neighborCell.isImpassable()) {
+						cells.enqueue(neighborCell);
+						retValue++;
+						System.out.println("         neighbor: " + neighborCell);
+					}	
+					else {
+						System.out.println("Case 1 (neighbor: " + neighborCell + ")");
+					}
+				}	
+				else {
+					System.out.println("Case 2 (neighbor: " + neighborCell + ")");
+				}
+			}	
+			else {
+				System.out.println("Case 3 (neighbor: " + neighborCell + ")");
+			}
 
-			if (!cells.contains(neighborCell) && !neighborCell.isImpassable()) {
-				cells.enqueue(neighborCell);
+		}
+		
+		// Enqueue vertex neighbors
+		for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
+			Cell neighborCell = grid_.getCell(c.getPoint(),
+					Constants.VERTEX_NEIGHBOR_OFFSETS[i][0],
+					Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
+			
+			if (neighborCell != null) {
+				if (!prevCells.contains(neighborCell)){
+					if (!cells.contains(neighborCell) && !neighborCell.isImpassable()) {
+						cells.enqueue(neighborCell);
+						retValue++;
+						System.out.println("         neighbor: " + neighborCell);
+					}	
+					else {
+						System.out.println("Case 1 (neighbor: " + neighborCell + ")");
+					}
+				}	
+				else {
+					System.out.println("Case 2 (neighbor: " + neighborCell + ")");
+				}
+			}	
+			else {
+				System.out.println("Case 3 (neighbor: " + neighborCell + ")");
 			}
 
 		}
 
-		return cells;
+		return retValue;
 
 	}
 
@@ -162,6 +250,30 @@ public class Helper {
 		 */
 
 	}
+	
+	/**
+	 * From a given point gets the best cell to target and returns a move
+	 * 
+	 * @param g
+	 * @param p
+	 * @return
+	 */
+	public static Move getTargetedMoveFrom(Point point_, Grid grid_) {
+
+		// get the targeted cell
+		Cell dest = getTargetedCell(point_, grid_);
+		System.out.println(dest);
+
+		Point destPoint = dest.getPoint();
+
+		// get the path to that cell
+		// Point points[] = getPath(point_, destPoint, grid_);
+
+		// get the first move
+		Move m = getPathMove(point_, destPoint, grid_);
+
+		return m;
+	}
 
 	/**
 	 * Calculates path score based on path array
@@ -222,29 +334,6 @@ public class Helper {
 	}
 
 	/**
-	 * From a given point gets the best cell to target and returns a move
-	 * 
-	 * @param g
-	 * @param p
-	 * @return
-	 */
-	public static Move getTargetedMoveFrom(Point point_, Grid grid_) {
-
-		// get the targeted cell
-		Cell dest = getOptimalCellDestination(grid_, point_);
-		
-		Point destPoint = dest.getPoint();
-
-		// get the path to that cell
-		// Point points[] = getPath(point_, destPoint, grid_);
-
-		// get the first move
-		Move m = getPathMove(point_, destPoint, grid_);
-
-		return m;
-	}
-
-	/**
 	 * For a given point it evaluates best move amongst nearby neighbors
 	 * 
 	 * @param point_
@@ -274,11 +363,7 @@ public class Helper {
 //						}
 						
 						int cellOpennessScore = grid_.getOpennessScore(c.getPoint());
-						//Prefer diagonal cells?
-						if(i % 2 != 0){
-							cellOpennessScore += 2;
-						}
-						
+						System.out.println(cellOpennessScore);
 						if (cellOpennessScore > maxVisitedScore) {
 							maxVisitedScoreIndex = visitedNeighbours.size() - 1;
 							maxVisitedScore = cellOpennessScore;
@@ -287,11 +372,8 @@ public class Helper {
 					} else {
 						unVisitedNeighbours.add(c);
 						double cellScore = c.getScore();
-						//Diagonal Cells?
-						if(i % 2 != 0){
-							cellScore += 2;
-						}
 
+						System.out.println(cellScore);
 						if (cellScore > maxUnvisitedScore) {
 							maxUnvisitedScoreIndex = unVisitedNeighbours.size() - 1;
 							maxUnvisitedScore = cellScore;
@@ -302,11 +384,16 @@ public class Helper {
 			}
 		}
 
-		
+		System.out.println("MaxScore" + maxUnvisitedScore);
+
 		if (unVisitedNeighbours.size() != 0) {
+
 			Cell to = unVisitedNeighbours.get(maxUnvisitedScoreIndex);
+			// System.out.println(to);
 			return Helper.getMove(point_, to.getPoint());
 		} else /* if(visitedNeighbours.size() != 0) */{
+
+			// return Helper.getTargetedMoveFrom(point_, grid_);
 			Cell to = visitedNeighbours.get(maxVisitedScoreIndex);
 			return Helper.getMove(point_, to.getPoint());
 		}
@@ -341,6 +428,7 @@ public class Helper {
 		for (int i = 0; i < possOffsets.length; i++) {
 			Cell c = grid_.getCell(currentLocation_, possOffsets[i][0],
 					possOffsets[i][1]);
+			// System.out.println(c.getPoint() + " " + c.getScore());
 			if (!c.isImpassable()) {
 				possMoves.add(c);
 				// int cellScore = c.getScore() - c.getLastTurnVisited() + ;
@@ -356,6 +444,7 @@ public class Helper {
 		if (possMoves.size() != 0) {
 
 			Cell to = possMoves.get(maxScoreIndex);
+			// System.out.println(to);
 			return Helper.getMove(currentLocation_, to.getPoint());
 		} else {
 			// TODO Auto-generated method stub
