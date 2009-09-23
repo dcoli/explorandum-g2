@@ -44,6 +44,8 @@ public class Constants {
 
 	public static final int FOOTPRINT_TARGETTING_OFFSET = 10;
 
+	public static int CURRENT_TURN = 0;
+
 	public static boolean TARGETTING_MODE_ON = false;
 
 	public static int getFootPrintThreshold(int currTurn, int totalNoOfTurns) {
@@ -62,6 +64,16 @@ public class Constants {
 		
 	}
 
+	public static int getWaterScore(int currTurn,int totalNoOfTurns){
+		if (currTurn <= 0.4 * totalNoOfTurns) {
+			return Constants.RANGE;
+		} else if (currTurn <= 0.7 * totalNoOfTurns) {
+			return 2;
+		} else {
+			return 1;
+		}
+	}
+	
 	public static int getClaimThreshold(int currTurn, int totalNoOfTurns) {
 		if(currTurn <= 0.4 * totalNoOfTurns){
 			return (int) (0.6 * LONG_TERM_HISTORY_LENGTH);
