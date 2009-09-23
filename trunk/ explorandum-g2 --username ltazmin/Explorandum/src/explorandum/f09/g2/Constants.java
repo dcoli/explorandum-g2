@@ -48,10 +48,11 @@ public class Constants {
 
 	public static int getFootPrintThreshold(int currTurn, int totalNoOfTurns) {
 		if (currTurn <= 0.2 * totalNoOfTurns) {
-			return 10;
+			//colin changed value from 10
+			return 2;
 		}
 		else if (currTurn <= 0.4 * totalNoOfTurns) {
-			return 5;
+			return 4;
 		} else if (currTurn <= 0.7 * totalNoOfTurns) {
 			return 7;
 		} else {
