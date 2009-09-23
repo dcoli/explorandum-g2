@@ -115,8 +115,8 @@ public class Grid {
 			cell.setFirstTurnVisited(turn);
 			cell.setVisited(true);
 			cell.updateMinDistanceSeenFrom(0);
-			
-			//Remove from unvisited cells
+
+			// Remove from unvisited cells
 			_unVisitedCells.remove(p);
 		}
 		// Update Ownership
@@ -184,13 +184,13 @@ public class Grid {
 			}
 			putCell(p, cell);
 			retVal = true;
-			
+
 			_unVisitedCells.add(p);
 		}
 
+		cell.updateMinDistanceSeenFrom((int) cell
+				.getDistanceFrom(currentLocation));
 
-		cell.updateMinDistanceSeenFrom((int)cell.getDistanceFrom(currentLocation));
-		
 		checkAndUpdateXSeen(p.x);
 		checkAndUpdateYSeen(p.y);
 		Grid.computeScore(cell, this);
@@ -249,8 +249,9 @@ public class Grid {
 						break;
 
 					case Constants.TERRAIN_WATER:
-						score += Constants.RANGE;
-						//score += 3;
+						score += Constants.getWaterScore(
+								Constants.CURRENT_TURN, Constants.NO_OF_ROUNDS);;
+						// score += 3;
 						break;
 
 					case Constants.TERRAIN_MOUNTAIN:
@@ -258,7 +259,7 @@ public class Grid {
 						break;
 					}
 
-					//score += 1;
+					// score += 1;
 
 					switch (c.getOwner()) {
 					case Constants.OWNED_BY_THEM:
@@ -276,7 +277,7 @@ public class Grid {
 
 				} else {
 					// Unseen cell +2
-					//score += 4;
+					// score += 4;
 
 					score += Constants.RANGE;
 				}
@@ -296,8 +297,9 @@ public class Grid {
 						break;
 
 					case Constants.TERRAIN_WATER:
-						score += Constants.RANGE;
-						//score += 3;
+						score += Constants.getWaterScore(
+								Constants.CURRENT_TURN, Constants.NO_OF_ROUNDS);
+						// score += 3;
 						break;
 
 					case Constants.TERRAIN_MOUNTAIN:
@@ -320,15 +322,14 @@ public class Grid {
 					}
 
 				} else {
-					//score += 3;
+					// score += 3;
 					score += Constants.RANGE;
 				}
 
 			}
 
-			
-			score+= Constants.RANGE - cell_.getMinDistanceSeenFrom();
-			
+			score += Constants.RANGE - cell_.getMinDistanceSeenFrom();
+			score += 1 - cell_.getNoOfTimesVisited();
 			cell_.setScore(score);
 		}
 
@@ -477,7 +478,7 @@ public class Grid {
 
 		}
 
-		// Edge Neighbours
+		// Vertex Neighbours
 		for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
 			Cell c = getCell(p, Constants.VERTEX_NEIGHBOR_OFFSETS[i][0],
 					Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
@@ -494,7 +495,11 @@ public class Grid {
 
 		if (curr.isVisited()) {
 			score += 5 * (1 - curr.getLastTurnVisited() * 1.0
-					/ Constants.NO_OF_ROUNDS);
+					/ Constants.CURRENT_TURN);
+
+			if (curr.getLastTurnVisited() >= Constants.CURRENT_TURN - 5) {
+				score -= 5;
+			}
 		}
 		return score;
 	}

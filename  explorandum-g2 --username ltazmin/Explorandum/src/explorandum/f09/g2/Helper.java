@@ -232,8 +232,7 @@ public class Helper {
 
 		// get the targeted cell
 		Cell dest = getOptimalCellDestination(grid_, point_);
-		System.out.println(dest);
-
+		
 		Point destPoint = dest.getPoint();
 
 		// get the path to that cell
@@ -275,7 +274,11 @@ public class Helper {
 //						}
 						
 						int cellOpennessScore = grid_.getOpennessScore(c.getPoint());
-						System.out.println(cellOpennessScore);
+						//Prefer diagonal cells?
+						if(i % 2 != 0){
+							cellOpennessScore += 2;
+						}
+						
 						if (cellOpennessScore > maxVisitedScore) {
 							maxVisitedScoreIndex = visitedNeighbours.size() - 1;
 							maxVisitedScore = cellOpennessScore;
@@ -284,8 +287,11 @@ public class Helper {
 					} else {
 						unVisitedNeighbours.add(c);
 						double cellScore = c.getScore();
+						//Diagonal Cells?
+						if(i % 2 != 0){
+							cellScore += 2;
+						}
 
-						System.out.println(cellScore);
 						if (cellScore > maxUnvisitedScore) {
 							maxUnvisitedScoreIndex = unVisitedNeighbours.size() - 1;
 							maxUnvisitedScore = cellScore;
@@ -296,16 +302,11 @@ public class Helper {
 			}
 		}
 
-		System.out.println("MaxScore" + maxUnvisitedScore);
-
+		
 		if (unVisitedNeighbours.size() != 0) {
-
 			Cell to = unVisitedNeighbours.get(maxUnvisitedScoreIndex);
-			// System.out.println(to);
 			return Helper.getMove(point_, to.getPoint());
 		} else /* if(visitedNeighbours.size() != 0) */{
-
-			// return Helper.getTargetedMoveFrom(point_, grid_);
 			Cell to = visitedNeighbours.get(maxVisitedScoreIndex);
 			return Helper.getMove(point_, to.getPoint());
 		}
@@ -340,7 +341,6 @@ public class Helper {
 		for (int i = 0; i < possOffsets.length; i++) {
 			Cell c = grid_.getCell(currentLocation_, possOffsets[i][0],
 					possOffsets[i][1]);
-			// System.out.println(c.getPoint() + " " + c.getScore());
 			if (!c.isImpassable()) {
 				possMoves.add(c);
 				// int cellScore = c.getScore() - c.getLastTurnVisited() + ;
@@ -356,7 +356,6 @@ public class Helper {
 		if (possMoves.size() != 0) {
 
 			Cell to = possMoves.get(maxScoreIndex);
-			// System.out.println(to);
 			return Helper.getMove(currentLocation_, to.getPoint());
 		} else {
 			// TODO Auto-generated method stub
