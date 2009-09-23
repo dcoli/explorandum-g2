@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.HashMap;
 
+import explorandum.GameConstants;
 import explorandum.Logger;
 import explorandum.Move;
 import explorandum.Player;
@@ -24,8 +26,11 @@ public class G2Player implements Player {
 	private Random _rand;
 	private ArrayList<PastMove> _pastMoves;
 	private TargetInfo _targetInfo;
-	
 
+//	private int lastBounceDetermination = 0;
+//	private int time;
+//	private HashMap< Point, Integer > bounceCheckHash;
+	
 	public G2Player() {
 		_grid = new Grid();
 		_pastMoves = new ArrayList<PastMove>();
@@ -39,6 +44,7 @@ public class G2Player implements Player {
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
 
+		
 		int newSeenCellCount = 0;
 		// Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
@@ -55,11 +61,24 @@ public class G2Player implements Player {
 		// Put move in pastMoves list
 		_pastMoves.add(0, new PastMove(currentLocation_, offsets_,
 				hasExplorer_, visibleExplorers_, time_, StepStatus,newSeenCellCount));
-		
+
 		if(_pastMoves.size() > Constants.LONG_TERM_HISTORY_LENGTH){
 			_pastMoves.remove(Constants.LONG_TERM_HISTORY_LENGTH -1);
 		}
 
+				//
+		// checking for BOUNCING, incomplete - colin
+		//
+/*		bounceCheckHash.put( currentLocation_, time_ );
+		int action = ACTIONS[_rand.nextInt(ACTIONS.length)];
+		if ( isBouncing( bounceCheckHash, _pastMoves, lastBounceDetermination )) { 
+			startTargetting ( 
+				currentLocation_, 
+				new Point( currentLocation_.x + GameConstants._dx[action], currentLocation_.y + GameConstants._dy[action] )
+			);
+		}
+*/
+		
 		
 //		HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_,
 //				Constants.NO_OF_ROUNDS);
@@ -83,6 +102,10 @@ public class G2Player implements Player {
 		return m;
 
 	}
+
+//	private boolean isBouncing( HashMap bounceCheckHash_, int lastSuccessfulBounceCheck_) {
+//		return false;
+//	}
 
 	public String name() throws Exception {
 		return "Lumbering Troglodyte";
