@@ -65,7 +65,7 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
 
             // Percolate up
         int hole = ++currentSize;
-        for( ; hole > 1 && x.compareTo( array[ hole / 2 ] ) < 0; hole /= 2 )
+        for( ; hole > 1 && x.compareTo( array[ hole / 2 ] ) > 0; hole /= 2 )
             array[ hole ] = array[ hole / 2 ];
         array[ hole ] = x;
     }
@@ -86,24 +86,24 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
     public AnyType findMax( )
     {
         //if( isEmpty( ) )
-        //    throw new UnderflowException( );
+           // throw new UnderflowException( );
         return array[ 1 ];
     }
 
     /**
      * Remove the largest item from the priority queue.
-     * @return the smallest item, or throw an UnderflowException if empty.
+     * @return the largest item, or throw an UnderflowException if empty.
      */
     public AnyType deleteMax( )
     {
         //if( isEmpty( ) )
-        //    throw new UnderflowException( );
+            //throw new UnderflowException( );
 
-        AnyType minItem = findMax( );
+        AnyType maxItem = findMax( );
         array[ 1 ] = array[ currentSize-- ];
         percolateDown( 1 );
 
-        return minItem;
+        return maxItem;
     }
 
     /**
@@ -160,18 +160,11 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
         }
         array[ hole ] = tmp;
     }
-
-        // Test program
-    public static void main( String [ ] args )
-    {
-        int numItems = 10000;
-        BinaryHeap<Integer> h = new BinaryHeap<Integer>( );
-        int i = 37;
-
-        for( i = 37; i != 0; i = ( i + 37 ) % numItems )
-            h.insert( i );
-        for( i = 1; i < numItems; i++ )
-            if( h.deleteMax( ) != i )
-                System.out.println( "Oops! " + i );
+    
+    public void printHeap() {
+    	for (int i = 0; i < array.length; i++) {
+    		System.out.println(array[i]);
+    	}
     }
+
 }
