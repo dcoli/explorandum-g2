@@ -2,10 +2,12 @@ package explorandum.f09.g2;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.omg.CORBA._PolicyStub;
 
+import explorandum.Logger;
 import explorandum.GameConstants;
 import explorandum.Move;
 
@@ -29,11 +31,33 @@ public class HistoryHelper {
 	 * @return
 	 */
 	public static int[] analyseHistory(ArrayList<PastMove> pastMoves,
-			Grid grid_, G2Player player_, int currTurn_, int totalNoOfTurns_) {
+			Grid grid_, G2Player player_, int currTurn_, int totalNoOfTurns_, Logger log) {
 
 		int historyCount = 0;
 		int footprintCount = 0;
 		int claimCount = 0;
+		int dxCount = 0;
+		int dyCount = 0;
+		
+		
+		/*
+		 * bouncing - checks pastMoves for uniqueness within given threshold
+		 */
+
+		HashSet<PastMove> bounceHash = new HashSet();
+
+		if ( !Constants.TARGETTING_MODE_ON ) {
+			for (PastMove m: pastMoves) {
+					bounceHash.add(m);
+			}
+		}
+		
+		//log.debug("bouncing threshold: "+Constants.BOUNCING_THRESHOLD);
+		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
+			Constants.TARGETTING_MODE_ON = true;
+		}
+
+		
 		/*		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
 			PastMove m = (PastMove) iterator.next();
 			Cell c = grid_.getCell(m.getCurrentLocation_());
@@ -61,8 +85,6 @@ public class HistoryHelper {
 
 		}
 */
-		int dxCount = 0;
-		int dyCount = 0;
 /*
 		// System.out.println(footprintCount);
 		Point currentLocation = pastMoves.get(0).getCurrentLocation_();

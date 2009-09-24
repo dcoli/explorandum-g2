@@ -20,7 +20,7 @@ import explorandum.Player;
 public class G2Player implements Player {
 
 	private int _explorerID;
-	private Logger _log;
+	public Logger _log;
 
 	private Grid _grid;
 	private Random _rand;
@@ -69,7 +69,7 @@ public class G2Player implements Player {
 				//
 		// checking for BOUNCING, incomplete - colin
 		//
-/*		bounceCheckHash.put( currentLocation_, time_ );
+		/*		bounceCheckHash.put( currentLocation_, time_ );
 		int action = ACTIONS[_rand.nextInt(ACTIONS.length)];
 		if ( isBouncing( bounceCheckHash, _pastMoves, lastBounceDetermination )) { 
 			startTargetting ( 
@@ -80,8 +80,8 @@ public class G2Player implements Player {
 */
 		
 		
-//		HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_,
-//				Constants.NO_OF_ROUNDS);
+		HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_,
+				Constants.NO_OF_ROUNDS, _log);
 
 		if (Constants.TARGETTING_MODE_ON) {
 			evaluateTargetting(currentLocation_);
@@ -93,7 +93,7 @@ public class G2Player implements Player {
 				stopTargetting();
 			}
 		}
-		Move m = Helper.getMoveFrom(currentLocation_, _grid);
+		Move m = Helper.getMoveFrom(currentLocation_, _grid, _log);
 
 		return m;
 
