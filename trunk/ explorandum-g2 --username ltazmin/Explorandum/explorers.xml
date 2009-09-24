@@ -18,7 +18,7 @@
 	
 	<entry key = "explorers.board.dir">boards</entry>
 	
-	<entry key = "explorers.Logger.PlayerLogLevel">FATAL</entry>
+	<entry key = "explorers.Logger.PlayerLogLevel">DEBUG</entry>
 	
 	<entry key = "explorers.Logger.SimulatorLogLevel">FATAL</entry>
 </properties>
