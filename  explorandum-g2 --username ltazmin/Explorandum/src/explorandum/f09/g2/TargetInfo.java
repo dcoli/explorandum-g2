@@ -13,9 +13,9 @@ public class TargetInfo {
 	public TargetInfo(Point target_, Point currentLocation_) {
 		super();
 		target = target_;
-		System.out.println(target);
+		//System.out.println(target);
 
-		System.out.println(currentLocation_);
+		//System.out.println(currentLocation_);
 		originaldx = target_.x - currentLocation_.x;
 		originaldy = target_.y - currentLocation_.y;
 		maxMoveAllowed = Math.abs(originaldx) + Math.abs(originaldy);

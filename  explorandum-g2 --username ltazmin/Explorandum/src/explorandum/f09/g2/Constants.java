@@ -43,6 +43,7 @@ public class Constants {
 	public static int NO_OF_EXPLORERS = 0;
 
 	public static final int FOOTPRINT_TARGETTING_OFFSET = 10;
+	public static final int BOUNCING_THRESHOLD = 6;
 
 	public static int CURRENT_TURN = 0;
 

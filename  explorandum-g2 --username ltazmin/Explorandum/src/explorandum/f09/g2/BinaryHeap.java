@@ -163,7 +163,7 @@ public class BinaryHeap<AnyType extends Comparable<? super AnyType>>
     
     public void printHeap() {
     	for (int i = 0; i < array.length; i++) {
-    		System.out.println(array[i]);
+    		//System.out.println(array[i]);
     	}
     }
 
