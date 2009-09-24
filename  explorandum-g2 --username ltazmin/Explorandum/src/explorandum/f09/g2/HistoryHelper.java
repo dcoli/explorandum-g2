@@ -34,7 +34,7 @@ public class HistoryHelper {
 		int historyCount = 0;
 		int footprintCount = 0;
 		int claimCount = 0;
-		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
+		/*		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
 			PastMove m = (PastMove) iterator.next();
 			Cell c = grid_.getCell(m.getCurrentLocation_());
 			historyCount++;
@@ -60,10 +60,10 @@ public class HistoryHelper {
 			}
 
 		}
-
+*/
 		int dxCount = 0;
 		int dyCount = 0;
-
+/*
 		// System.out.println(footprintCount);
 		Point currentLocation = pastMoves.get(0).getCurrentLocation_();
 		if (footprintCount >= Constants.getFootPrintThreshold(currTurn_,
@@ -124,7 +124,7 @@ public class HistoryHelper {
 		// System.out.println("Claim Threshold reached");
 		// System.out.println(grid_.getOpenRandomTarget(currentLocation));
 		// }
-
+*/
 		int[] retVal = new int[] { footprintCount, claimCount, dxCount, dyCount };
 		return retVal;
 
