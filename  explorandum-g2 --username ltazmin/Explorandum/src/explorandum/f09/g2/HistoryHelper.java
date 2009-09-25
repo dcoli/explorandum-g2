@@ -48,13 +48,42 @@ public class HistoryHelper {
 		HashSet<Point> bounceHash = new HashSet();
 
 		log.debug("pastmoves size "+pastMoves.size());
+
 		if ( !Constants.TARGETTING_MODE_ON ) {
+
 			for (PastMove m: pastMoves) {
-					bounceHash.add(m.getCurrentLocation_());
-					//log.debug("bounceHash size: " + bounceHash.size());
+				Cell c = grid_.getCell(m.getCurrentLocation_());
+
+				//BOUNCING
+				bounceHash.add(m.getCurrentLocation_());
+
+				//FOOTSTEPS (TRACKING)
+				historyCount++;
+				if (historyCount <= Constants.SHORT_TERM_HISTORY_LENGTH) {
+					log.debug("Here " + m.StepStatus + " "
+							+ c.getFirstTurnVisited() + " "
+							+ c.getLastTurnVisited() + " " + c.getOwner());
+					if (m.StepStatus == true
+							&& c.getOwner() != Constants.OWNED_BY_US) {
+						footprintCount++;
+						// //log.debug("Footprint seen");
+					}
+
+				}
+				
+				//CLAIMS (RETRACING)
+				if (historyCount <= Constants.LONG_TERM_HISTORY_LENGTH) {
+					if (c.getFirstTurnVisited() == c.getLastTurnVisited()
+							&& c.getOwner() == Constants.OWNED_BY_US) {
+						claimCount++;
+
+					}
+				}
+
 			}
 		}
 		
+		//BOUNCING
 		log.debug("bounceHash size: "+ bounceHash.size() +" obj:"+bounceHash.toString());
 		
 		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
@@ -68,35 +97,8 @@ public class HistoryHelper {
 			System.exit(0);*/
 		}
 				
-		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
-			PastMove m = (PastMove) iterator.next();
-			Cell c = grid_.getCell(m.getCurrentLocation_());
-			historyCount++;
-
-			if (historyCount <= Constants.SHORT_TERM_HISTORY_LENGTH) {
-				System.out.println("Here " + m.StepStatus + " "
-						+ c.getFirstTurnVisited() + " "
-						+ c.getLastTurnVisited() + " " + c.getOwner());
-				if (m.StepStatus == true
-						&& c.getOwner() != Constants.OWNED_BY_US) {
-					footprintCount++;
-					// //System.out.println("Footprint seen");
-				}
-
-			}
-
-			if (historyCount <= Constants.LONG_TERM_HISTORY_LENGTH) {
-				if (c.getFirstTurnVisited() == c.getLastTurnVisited()
-						&& c.getOwner() == Constants.OWNED_BY_US) {
-					claimCount++;
-
-				}
-			}
-
-		}
-
 /*
-		// System.out.println(footprintCount);
+		// log.debug(footprintCount);
 		Point currentLocation = pastMoves.get(0).getCurrentLocation_();
 		if (footprintCount >= Constants.getFootPrintThreshold(currTurn_,
 				totalNoOfTurns_)) {
@@ -115,9 +117,9 @@ public class HistoryHelper {
 				Cell c1 = grid_.getCell(currentLocation, 1, 0);
 				Cell c2 = grid_.getCell(currentLocation, -1, 0);
 
-				// System.out.println("dx " + currentLocation);
-				// System.out.println(c1.getPoint() + " " + c1.getScore());
-				// System.out.println(c2.getPoint() + " " + c2.getScore());
+				// log.debug("dx " + currentLocation);
+				// log.debug(c1.getPoint() + " " + c1.getScore());
+				// log.debug(c2.getPoint() + " " + c2.getScore());
 
 				if (c1.getScore() >= c2.getScore()) {
 					player_.startTargetting(currentLocation, new Point(
@@ -134,9 +136,9 @@ public class HistoryHelper {
 				Cell c1 = grid_.getCell(currentLocation, 0, 1);
 				Cell c2 = grid_.getCell(currentLocation, 0, -1);
 
-				// System.out.println("dy " + currentLocation);
-				// System.out.println(c1.getPoint() + " " + c1.getScore());
-				// System.out.println(c2.getPoint() + " " + c2.getScore());
+				// log.debug("dy " + currentLocation);
+				// log.debug(c1.getPoint() + " " + c1.getScore());
+				// log.debug(c2.getPoint() + " " + c2.getScore());
 
 				if (c1.getScore() >= c2.getScore()) {
 					player_.startTargetting(currentLocation, new Point(
@@ -153,8 +155,8 @@ public class HistoryHelper {
 		// if (currTurn_>= 0.05 * totalNoOfTurns_ && claimCount <=
 		// Constants.getClaimThreshold(currTurn_,
 		// totalNoOfTurns_)) {
-		// System.out.println("Claim Threshold reached");
-		// System.out.println(grid_.getOpenRandomTarget(currentLocation));
+		// log.debug("Claim Threshold reached");
+		// log.debug(grid_.getOpenRandomTarget(currentLocation));
 		// }
 */
 		return retVal;
