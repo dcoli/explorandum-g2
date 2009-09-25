@@ -44,7 +44,7 @@ public class G2Player implements Player {
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
 
-		int[] considerations = {0,0,0,0,0};
+		boolean[] considerations;
 		int newSeenCellCount = 0;
 		// Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
@@ -66,16 +66,19 @@ public class G2Player implements Player {
 			_pastMoves.remove(Constants.LONG_TERM_HISTORY_LENGTH -1);
 		}
 
-		
 		boolean isBouncing, isTracking, isRetracing;
 
 		if( ! Constants.TARGETTING_MODE_ON ) {
 
 			considerations = HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_, Constants.NO_OF_ROUNDS, _log);
 
-			isBouncing = considerations[Constants.HISTORY_BOUNCES_INDEX] > 0;
-			isTracking = considerations[Constants.HISTORY_FOOTPRINT_INDEX] > Constants.getFootPrintThreshold( time_, Constants.NO_OF_ROUNDS);
-			isRetracing = considerations[Constants.HISTORY_CLAIM_INDEX] > 0;
+			isBouncing = considerations[Constants.HISTORY_BOUNCES_INDEX];
+			isTracking = considerations[Constants.HISTORY_FOOTPRINT_INDEX];
+			isRetracing = considerations[Constants.HISTORY_CLAIM_INDEX];
+			
+			/*
+			 * TODO need to target our way out of this mess
+			 */
 		}
 		
 		if (Constants.TARGETTING_MODE_ON) {

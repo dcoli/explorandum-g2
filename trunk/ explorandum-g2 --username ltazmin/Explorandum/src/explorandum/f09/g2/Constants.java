@@ -49,11 +49,11 @@ public class Constants {
 
 	public static boolean TARGETTING_MODE_ON = false;
 	
-	public static int HISTORY_FOOTPRINT_INDEX = 0;
-	public static int HISTORY_CLAIM_INDEX = 1;
-	public static int HISTORY_DX_INDEX = 2;
-	public static int HISTORY_DY_INDEX = 3;
-	public static int HISTORY_BOUNCES_INDEX = 4;
+	public static int HISTORY_BOUNCES_INDEX = 0;
+	public static int HISTORY_FOOTPRINT_INDEX = 1;
+	public static int HISTORY_CLAIM_INDEX = 2;
+	public static int HISTORY_DX_INDEX = 3;
+	public static int HISTORY_DY_INDEX = 4;
 
 	public static int getFootPrintThreshold(int currTurn, int totalNoOfTurns) {
 		if (currTurn <= 0.2 * totalNoOfTurns) {

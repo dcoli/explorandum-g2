@@ -30,7 +30,7 @@ public class HistoryHelper {
 	 * @param grid_
 	 * @return
 	 */
-	public static int[] analyseHistory( ArrayList<PastMove> pastMoves,
+	public static boolean[] analyseHistory( ArrayList<PastMove> pastMoves,
 			Grid grid_, G2Player player_, int currTurn_, int totalNoOfTurns_, Logger log) {
 
 		int historyCount = 0;
@@ -38,8 +38,8 @@ public class HistoryHelper {
 		int claimCount = 0;
 		int dxCount = 0;
 		int dyCount = 0;
-		int isBouncing = 0;
-		int[] retVal = new int[] { footprintCount, claimCount, dxCount, dyCount, isBouncing };
+		boolean isBouncing = true, isTracking = true, isRetracing = true;
+		boolean[] retVal = { false, false, false };
 		
 		
 		/*
@@ -47,9 +47,7 @@ public class HistoryHelper {
 		 */
 		HashSet<Point> bounceHash = new HashSet();
 
-		log.debug("pastmoves size "+pastMoves.size());
-
-		if ( !Constants.TARGETTING_MODE_ON ) {
+//		log.debug("pastmoves size "+pastMoves.size());
 
 			for (PastMove m: pastMoves) {
 				Cell c = grid_.getCell(m.getCurrentLocation_());
@@ -66,7 +64,7 @@ public class HistoryHelper {
 					if (m.StepStatus == true
 							&& c.getOwner() != Constants.OWNED_BY_US) {
 						footprintCount++;
-						// //log.debug("Footprint seen");
+						log.debug("Footprint seen");
 					}
 
 				}
@@ -79,37 +77,47 @@ public class HistoryHelper {
 
 					}
 				}
-
 			}
-		}
 		
-		//BOUNCING
-		log.debug("bounceHash size: "+ bounceHash.size() +" obj:"+bounceHash.toString());
+		//TEST BOUNCING
 		
 		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
-			retVal[Constants.HISTORY_BOUNCES_INDEX] = Constants.BOUNCING_THRESHOLD;
-			/*log.debug("reached bouncing threshold: "+Constants.BOUNCING_THRESHOLD);
-			Point curr = pastMoves.get(0).getCurrentLocation_();
-			Point target = pastMoves.get( pastMoves.size() - Constants.BOUNCING_THRESHOLD - 2).getCurrentLocation_();//new Point(-30,-30);
-			log.debug("switching to target from "+curr.toString()+" to "+target.toString());
-			player_.startTargetting( curr, target);
-			pastMoves.clear();
-			System.exit(0);*/
+			isBouncing = true;
+			log.debug("pastMoves size: "+ pastMoves.size() +" obj:"+pastMoves.toString());
+			log.debug("bounceHash size: "+ bounceHash.size() +" obj:"+bounceHash.toString());
 		}
 				
-/*
-		// log.debug(footprintCount);
-		Point currentLocation = pastMoves.get(0).getCurrentLocation_();
-		if (footprintCount >= Constants.getFootPrintThreshold(currTurn_,
-				totalNoOfTurns_)) {
 
-			Move k = Helper.getMove(pastMoves.get(1).getCurrentLocation_(),
+		//TEST FOOTPRINTS
+		Point currentLocation = pastMoves.get(0).getCurrentLocation_();
+		if (footprintCount >= Constants.getFootPrintThreshold(currTurn_,totalNoOfTurns_)) { //if too many footprints
+			isTracking = true;
+			log.debug(footprintCount);
+
+		}
+
+		// TEST RETRACING
+		if (currTurn_>= 0.05 * totalNoOfTurns_ && claimCount <= Constants.getClaimThreshold(currTurn_, totalNoOfTurns_)) {
+			log.debug("Claim Threshold reached");
+			isRetracing = true;
+			// log.debug(grid_.getOpenRandomTarget(currentLocation));
+		}
+
+		retVal[Constants.HISTORY_BOUNCES_INDEX] = isBouncing;
+		retVal[Constants.HISTORY_FOOTPRINT_INDEX] = isTracking;
+		retVal[Constants.HISTORY_CLAIM_INDEX] = isRetracing;
+		return retVal;
+
+	}
+}
+
+/* MOVING THIS TO THE G2PLAYER CLASS
+ * 			Move k = Helper.getMove(pastMoves.get(1).getCurrentLocation_(),
 					pastMoves.get(0).getCurrentLocation_());
 			try {
 				dxCount += GameConstants._dx[k.getAction()];
 				dyCount += GameConstants._dy[k.getAction()];
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
@@ -149,17 +157,4 @@ public class HistoryHelper {
 							currentLocation.x, currentLocation.y
 									- Constants.FOOTPRINT_TARGETTING_OFFSET));
 				}
-			}
-		}
-
-		// if (currTurn_>= 0.05 * totalNoOfTurns_ && claimCount <=
-		// Constants.getClaimThreshold(currTurn_,
-		// totalNoOfTurns_)) {
-		// log.debug("Claim Threshold reached");
-		// log.debug(grid_.getOpenRandomTarget(currentLocation));
-		// }
-*/
-		return retVal;
-
-	}
-}
+			}*/
