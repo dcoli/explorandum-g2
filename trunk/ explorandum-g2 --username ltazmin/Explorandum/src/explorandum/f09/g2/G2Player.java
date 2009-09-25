@@ -66,24 +66,15 @@ public class G2Player implements Player {
 			_pastMoves.remove(Constants.LONG_TERM_HISTORY_LENGTH -1);
 		}
 
-				//
-		// checking for BOUNCING, incomplete - colin
-		//
-		/*		bounceCheckHash.put( currentLocation_, time_ );
-		int action = ACTIONS[_rand.nextInt(ACTIONS.length)];
-		if ( isBouncing( bounceCheckHash, _pastMoves, lastBounceDetermination )) { 
-			startTargetting ( 
-				currentLocation_, 
-				new Point( currentLocation_.x + GameConstants._dx[action], currentLocation_.y + GameConstants._dy[action] )
-			);
-		}
-*/
 		
 		boolean isBouncing, isTracking, isRetracing;
+
 		if( ! Constants.TARGETTING_MODE_ON ) {
+
 			considerations = HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_, Constants.NO_OF_ROUNDS, _log);
+
 			isBouncing = considerations[Constants.HISTORY_BOUNCES_INDEX] > 0;
-			isTracking = considerations[Constants.HISTORY_FOOTPRINT_INDEX] > Constants.FOOTPRINT_TARGETTING_OFFSET;
+			isTracking = considerations[Constants.HISTORY_FOOTPRINT_INDEX] > Constants.getFootPrintThreshold( time_, Constants.NO_OF_ROUNDS);
 			isRetracing = considerations[Constants.HISTORY_CLAIM_INDEX] > 0;
 		}
 		
