@@ -26,7 +26,7 @@ public class G2Player implements Player {
 	private Random _rand;
 	private ArrayList<PastMove> _pastMoves;
 	private TargetInfo _targetInfo;
-
+	
 //	private int lastBounceDetermination = 0;
 //	private int time;
 //	private HashMap< Point, Integer > bounceCheckHash;
@@ -44,7 +44,7 @@ public class G2Player implements Player {
 			Boolean[] hasExplorer_, Integer[][] visibleExplorers_,
 			Integer[] terrain_, int time_, Boolean StepStatus) throws Exception {
 
-		
+		int[] considerations = {0,0,0,0,0};
 		int newSeenCellCount = 0;
 		// Update visible cell information for all cells
 		for (int i = 0; i < offsets_.length; i++) {
@@ -79,10 +79,14 @@ public class G2Player implements Player {
 		}
 */
 		
+		boolean isBouncing, isTracking, isRetracing;
+		if( ! Constants.TARGETTING_MODE_ON ) {
+			considerations = HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_, Constants.NO_OF_ROUNDS, _log);
+			isBouncing = considerations[Constants.HISTORY_BOUNCES_INDEX] > 0;
+			isTracking = considerations[Constants.HISTORY_FOOTPRINT_INDEX] > Constants.FOOTPRINT_TARGETTING_OFFSET;
+			isRetracing = considerations[Constants.HISTORY_CLAIM_INDEX] > 0;
+		}
 		
-		HistoryHelper.analyseHistory(_pastMoves, _grid, this, time_,
-				Constants.NO_OF_ROUNDS, _log);
-
 		if (Constants.TARGETTING_MODE_ON) {
 			evaluateTargetting(currentLocation_);
 			Move m = Helper.getNextMoveTowardsTarget(currentLocation_, _grid,

@@ -29,7 +29,7 @@ public class Helper {
 	public static Cell getTargetedCell(Point startingPoint, Grid g, Logger log) {
 
 		Cell startingCell = g.getCell(startingPoint);
-		log.info(startingCell + " <--- START");
+		log.debug(startingCell + " <--- START");
 		
 		Queue<Cell> neighborCells = new Queue<Cell>();
 		BinaryHeap<Cell> candidateCells = new BinaryHeap<Cell>();
