@@ -30,7 +30,7 @@ public class HistoryHelper {
 	 * @param grid_
 	 * @return
 	 */
-	public static int[] analyseHistory(ArrayList<PastMove> pastMoves,
+	public static int[] analyseHistory( ArrayList<PastMove> pastMoves,
 			Grid grid_, G2Player player_, int currTurn_, int totalNoOfTurns_, Logger log) {
 
 		int historyCount = 0;
@@ -38,27 +38,37 @@ public class HistoryHelper {
 		int claimCount = 0;
 		int dxCount = 0;
 		int dyCount = 0;
+		int isBouncing = 0;
+		int[] retVal = new int[] { footprintCount, claimCount, dxCount, dyCount, isBouncing };
 		
 		
 		/*
 		 * bouncing - checks pastMoves for uniqueness within given threshold
 		 */
+		HashSet<Point> bounceHash = new HashSet();
 
-		HashSet<PastMove> bounceHash = new HashSet();
-
+		log.debug("pastmoves size "+pastMoves.size());
 		if ( !Constants.TARGETTING_MODE_ON ) {
 			for (PastMove m: pastMoves) {
-					bounceHash.add(m);
+					bounceHash.add(m.getCurrentLocation_());
+					//log.debug("bounceHash size: " + bounceHash.size());
 			}
 		}
 		
-		//log.debug("bouncing threshold: "+Constants.BOUNCING_THRESHOLD);
-		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
-			Constants.TARGETTING_MODE_ON = true;
-		}
-
+		log.debug("bounceHash size: "+ bounceHash.size() +" obj:"+bounceHash.toString());
 		
-		/*		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
+		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
+			retVal[Constants.HISTORY_BOUNCES_INDEX] = Constants.BOUNCING_THRESHOLD;
+			/*log.debug("reached bouncing threshold: "+Constants.BOUNCING_THRESHOLD);
+			Point curr = pastMoves.get(0).getCurrentLocation_();
+			Point target = pastMoves.get( pastMoves.size() - Constants.BOUNCING_THRESHOLD - 2).getCurrentLocation_();//new Point(-30,-30);
+			log.debug("switching to target from "+curr.toString()+" to "+target.toString());
+			player_.startTargetting( curr, target);
+			pastMoves.clear();
+			System.exit(0);*/
+		}
+				
+		for (Iterator iterator = pastMoves.iterator(); iterator.hasNext();) {
 			PastMove m = (PastMove) iterator.next();
 			Cell c = grid_.getCell(m.getCurrentLocation_());
 			historyCount++;
@@ -84,7 +94,7 @@ public class HistoryHelper {
 			}
 
 		}
-*/
+
 /*
 		// System.out.println(footprintCount);
 		Point currentLocation = pastMoves.get(0).getCurrentLocation_();
@@ -147,7 +157,6 @@ public class HistoryHelper {
 		// System.out.println(grid_.getOpenRandomTarget(currentLocation));
 		// }
 */
-		int[] retVal = new int[] { footprintCount, claimCount, dxCount, dyCount };
 		return retVal;
 
 	}
