@@ -76,9 +76,18 @@ public class G2Player implements Player {
 			isTracking = considerations[Constants.HISTORY_FOOTPRINT_INDEX];
 			isRetracing = considerations[Constants.HISTORY_CLAIM_INDEX];
 			
+			boolean shouldFindCenter = _grid.analyseGrid( _log );
+			if ( shouldFindCenter ) {
+				Point centerOfGrid = _grid.getCenter( _log );
+			}
+
 			/*
 			 * TODO need to target our way out of this mess
-			 */
+			 * - target new path if footsteps found
+			 * - possibly target new path if retracing our steps too much
+			 * - head into the middle of the map if the estimation of unexplored territory becomes very high
+			 */			
+			
 		}
 		
 		if (Constants.TARGETTING_MODE_ON) {
