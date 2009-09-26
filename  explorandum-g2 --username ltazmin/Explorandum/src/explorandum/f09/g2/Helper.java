@@ -346,10 +346,12 @@ public class Helper {
 		ArrayList<Cell> visitedNeighbours = new ArrayList<Cell>();
 		double maxUnvisitedScore = Integer.MIN_VALUE;
 		int maxUnvisitedScoreIndex = 0;
+		int secondBestChoiceIndex = 0;
 		int maxVisitedScore = Integer.MIN_VALUE;
 		int maxVisitedScoreIndex = 0;
 		int oldestVisitIndex = 0;
 		int oldestVisit = Integer.MAX_VALUE;
+		Cell bestCell;
 		for (int i = 0; i < 8; i++) {
 			Cell c = grid_.getCell(point_, GameConstants._dx[i + 1],
 					GameConstants._dy[i + 1]);
@@ -368,17 +370,16 @@ public class Helper {
 						if (cellOpennessScore > maxVisitedScore) {
 							maxVisitedScoreIndex = visitedNeighbours.size() - 1;
 							maxVisitedScore = cellOpennessScore;
-
 						}
 					} else {
 						unVisitedNeighbours.add(c);
 						double cellScore = c.getScore();
-
 						log.info(cellScore);
 						if (cellScore > maxUnvisitedScore) {
+							grid_.get_secondBestChoices().add(0, c);
+							bestCell = c;
 							maxUnvisitedScoreIndex = unVisitedNeighbours.size() - 1;
 							maxUnvisitedScore = cellScore;
-
 						}
 					}
 				}
@@ -390,12 +391,14 @@ public class Helper {
 		if (unVisitedNeighbours.size() != 0) {
 
 			Cell to = unVisitedNeighbours.get(maxUnvisitedScoreIndex);
+			grid_.removeFrom_secondBestChoices(to, log);
 			// log.info(to);
 			return Helper.getMove(point_, to.getPoint());
 		} else /* if(visitedNeighbours.size() != 0) */{
 
 			// return Helper.getTargetedMoveFrom(point_, grid_);
 			Cell to = visitedNeighbours.get(maxVisitedScoreIndex);
+			grid_.removeFrom_secondBestChoices(to, log);
 			return Helper.getMove(point_, to.getPoint());
 		}
 	}

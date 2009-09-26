@@ -45,7 +45,7 @@ public class Constants {
 	public static final int FOOTPRINT_TARGETTING_OFFSET = 10;
 	public static final int BOUNCING_THRESHOLD = 6;
 
-	public static final float PERCENT_UNEXPLORED_MAP_LIMIT = (float).75;
+	public static final float RATIO_UNEXPLORED_MAP_THRESHOLD = (float).90;
 
 	public static int CURRENT_TURN = 0;
 
