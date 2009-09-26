@@ -1,6 +1,7 @@
 package explorandum.f09.g2;
 
 import java.awt.Point;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -20,6 +21,7 @@ public class Grid {
 	private HashMap<Point, Cell> _gridMap;
 	private HashSet<Point> _unVisitedCells;
 	private HashSet<Point> _visitedCells;
+	private ArrayList<Cell> _secondBestChoices;
 
 	/**
 	 * Counters to understand map size
@@ -40,6 +42,7 @@ public class Grid {
 		_gridMap = new HashMap<Point, Cell>();
 		_unVisitedCells = new HashSet<Point>();
 		_visitedCells = new HashSet<Point>();
+		_secondBestChoices = new ArrayList<Cell>();
 	}
 
 	/**
@@ -448,15 +451,33 @@ public class Grid {
 	 */
 	public boolean analyseGrid( Logger log ) {
 		
-		log.debug("max:"+maxXVisited+","+maxYVisited+" min:"+minXVisited+","+minYVisited+" visited:"+_visitedCells.size());
+		//log.debug("max:"+maxXVisited+","+maxYVisited+" min:"+minXVisited+","+minYVisited+" visited:"+_visitedCells.size());
 		int area = (maxXVisited - minXVisited + 1) * (maxYVisited - minYVisited + 1);
 		float percentUnexplored = 1 - ( ((float)(_visitedCells.size())) / ((float)area) );
-//		float percentUnexplored = (float).5;
-		boolean shouldFindCenter = percentUnexplored > Constants.PERCENT_UNEXPLORED_MAP_LIMIT;
-		log.debug("est. area:"+area+" unexplored:"+percentUnexplored+"%");
+		boolean shouldFindCenter = percentUnexplored > Constants.RATIO_UNEXPLORED_MAP_THRESHOLD;
+		if (shouldFindCenter) log.debug("est. area:"+area+" unexplored:"+(100*percentUnexplored)+"%");
 		return shouldFindCenter;
 	}
 
+
+	/**
+	 * Gets center of a map given by the extremes of points visited
+	 * 
+	 * @param log
+	 * 
+	 * @return Point in center
+	 */
+	public Point getCenter(Logger log) {
+		boolean isNegativeX = maxXVisited + minXVisited < 0;
+		boolean isNegativeY = maxYVisited + minYVisited < 0;
+		
+		int x = ( maxXVisited - minXVisited ) / 2;
+		if (isNegativeX) x = -1 * x;
+		int y = ( maxYVisited - minYVisited ) / 2;
+		if (isNegativeY) y = -1 * y;
+		
+		return new Point(x,y);
+	}
 	
 	
 	
@@ -559,15 +580,31 @@ public class Grid {
 		return score;
 	}
 
-	public Point getCenter(Logger log) {
-		boolean isNegativeX = maxXVisited + minXVisited < 0;
-		boolean isNegativeY = maxYVisited + minYVisited < 0;
-		
-		int x = ( maxXVisited - minXVisited ) / 2;
-		if (isNegativeX) x = -1 * x;
-		int y = ( maxYVisited - minYVisited ) / 2;
-		if (isNegativeY) y = -1 * y;
-		
-		return new Point(x,y);
+	/**
+	 * @param _secondBestChoices the _secondBestChoices to set
+	 */
+	public void set_secondBestChoices(ArrayList<Cell> _secondBestChoices) {
+		this._secondBestChoices = _secondBestChoices;
+	}
+
+	/**
+	 * @return the _secondBestChoices
+	 */
+	public ArrayList<Cell> get_secondBestChoices() {
+		return _secondBestChoices;
+	}
+
+	/**
+	 * Remove from the secondbestchoices arraylist in 2n time
+	 */
+	public void removeFrom_secondBestChoices( Cell c, Logger log ){
+		log.debug("removing visited cell from second best choices");
+		for ( int i = 0; i < _secondBestChoices.size(); i++ ) {
+			if ( _secondBestChoices.get(i).equals(c) ) _secondBestChoices.remove(c);
+		}
+	}
+
+	public Cell get_secondBestChoiceCell() {
+		return _secondBestChoices.get(0);
 	}
 }

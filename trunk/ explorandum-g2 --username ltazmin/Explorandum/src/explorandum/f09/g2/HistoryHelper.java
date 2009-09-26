@@ -80,7 +80,6 @@ public class HistoryHelper {
 			}
 		
 		//TEST BOUNCING
-		
 		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
 			isBouncing = true;
 			log.debug("pastMoves size: "+ pastMoves.size() +" obj:"+pastMoves.toString());
@@ -111,7 +110,7 @@ public class HistoryHelper {
 	}
 }
 
-/* MOVING THIS TO THE G2PLAYER CLASS
+/* MOVING THIS TO THE G2PLAYER CLASS - ACTUALLY USING TARGETING FUNCTION INSTEAD
  * 			Move k = Helper.getMove(pastMoves.get(1).getCurrentLocation_(),
 					pastMoves.get(0).getCurrentLocation_());
 			try {
