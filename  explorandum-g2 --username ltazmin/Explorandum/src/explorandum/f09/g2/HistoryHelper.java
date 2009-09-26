@@ -58,9 +58,9 @@ public class HistoryHelper {
 				//FOOTSTEPS (TRACKING)
 				historyCount++;
 				if (historyCount <= Constants.SHORT_TERM_HISTORY_LENGTH) {
-					log.debug("Here " + m.StepStatus + " "
-							+ c.getFirstTurnVisited() + " "
-							+ c.getLastTurnVisited() + " " + c.getOwner());
+					log.debug("Here " + "StepStatus: " + m.StepStatus + " first visited: "
+							+ c.getFirstTurnVisited() + " last visited: "
+							+ c.getLastTurnVisited() + " owner: " + c.getOwner());
 					if (m.StepStatus == true
 							&& c.getOwner() != Constants.OWNED_BY_US) {
 						footprintCount++;

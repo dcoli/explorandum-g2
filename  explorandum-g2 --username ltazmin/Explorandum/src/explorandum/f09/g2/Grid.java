@@ -4,6 +4,8 @@ import java.awt.Point;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import explorandum.Logger;
+
 /**
  * Class for the Grid/Map
  * 
@@ -17,6 +19,7 @@ public class Grid {
 	 */
 	private HashMap<Point, Cell> _gridMap;
 	private HashSet<Point> _unVisitedCells;
+	private HashSet<Point> _visitedCells;
 
 	/**
 	 * Counters to understand map size
@@ -25,13 +28,18 @@ public class Grid {
 	private int maxXSeen = 0;
 	private int minXSeen = 0;
 	private int maxYSeen = 0;
-
+	private int minXVisited = 0;
+	private int maxXVisited = 0;
+	private int minYVisited = 0;
+	private int maxYVisited = 0;
+	
 	/**
 	 * Private Constructor
 	 */
 	public Grid() {
 		_gridMap = new HashMap<Point, Cell>();
 		_unVisitedCells = new HashSet<Point>();
+		_visitedCells = new HashSet<Point>();
 	}
 
 	/**
@@ -118,6 +126,7 @@ public class Grid {
 
 			// Remove from unvisited cells
 			_unVisitedCells.remove(p);
+			_visitedCells.add(p);
 		}
 		// Update Ownership
 		if (cell.getOwner() != Constants.OWNED_BY_US) {
@@ -131,6 +140,8 @@ public class Grid {
 
 		checkAndUpdateXSeen(p.x);
 		checkAndUpdateYSeen(p.y);
+		checkAndUpdateXVisited(p.x);
+		checkAndUpdateYVisited(p.y);
 		Grid.computeScore(cell, this);
 
 		// Edge Neighbours
@@ -366,6 +377,20 @@ public class Grid {
 	}
 
 	/**
+	 * @return the minYSeen
+	 */
+	public int getMinYSeen() {
+		return minYSeen;
+	}
+
+	/**
+	 * @return the minXSeen
+	 */
+	public int getMinXSeen() {
+		return minXSeen;
+	}
+
+	/**
 	 * Sees if Y seen is greater than or lesser than current knowledge and
 	 * updates
 	 * 
@@ -381,30 +406,60 @@ public class Grid {
 		}
 	}
 
+	
+	
 	/**
-	 * @return the minYSeen
-	 */
-	public int getMinYSeen() {
-		return minYSeen;
-	}
-
-	/**
-	 * @return the minXtSeen
-	 */
-	public int getMinXSeen() {
-		return minXSeen;
-	}
-
-	/**
-	 * Analyses and returns an int array of informatiom Index 1 - Estimation of
-	 * map size covered Index 2 - Estimation of map left .....
+	 * Sees if X visited is greater than or lesser than current knowledge and
+	 * updates
 	 * 
-	 * @return
+	 * @param x
+	 *            the maxXVisited to set
 	 */
-	public static int[] analyseGrid() {
-		return new int[] {};
+	public void checkAndUpdateXVisited(int x) {
+		if (x < minXVisited) {
+			minXVisited = x;
+
+		} else if (x > maxXVisited) {
+			maxXVisited = x;
+		}
 	}
 
+	/**
+	 * Sees if y visited is greater than or lesser than current knowledge and
+	 * updates
+	 * 
+	 * @param y
+	 *            the mayyVisited to set
+	 */
+	public void checkAndUpdateYVisited(int y) {
+		if (y < minYVisited) {
+			minYVisited = y;
+
+		} else if (y > maxYVisited) {
+			maxYVisited = y;
+		}
+	}
+
+	
+	/**
+	 * Analyzes and returns a boolean saying one should explore unknown but estimated territory
+	 * 
+	 * @return if the unexplored percentage reaches a threshold value return true
+	 */
+	public boolean analyseGrid( Logger log ) {
+		
+		log.debug("max:"+maxXVisited+","+maxYVisited+" min:"+minXVisited+","+minYVisited+" visited:"+_visitedCells.size());
+		int area = (maxXVisited - minXVisited + 1) * (maxYVisited - minYVisited + 1);
+		float percentUnexplored = 1 - ( ((float)(_visitedCells.size())) / ((float)area) );
+//		float percentUnexplored = (float).5;
+		boolean shouldFindCenter = percentUnexplored > Constants.PERCENT_UNEXPLORED_MAP_LIMIT;
+		log.debug("est. area:"+area+" unexplored:"+percentUnexplored+"%");
+		return shouldFindCenter;
+	}
+
+	
+	
+	
 	/**
 	 * Returns random points chosen
 	 * 
@@ -502,5 +557,17 @@ public class Grid {
 			}
 		}
 		return score;
+	}
+
+	public Point getCenter(Logger log) {
+		boolean isNegativeX = maxXVisited + minXVisited < 0;
+		boolean isNegativeY = maxYVisited + minYVisited < 0;
+		
+		int x = ( maxXVisited - minXVisited ) / 2;
+		if (isNegativeX) x = -1 * x;
+		int y = ( maxYVisited - minYVisited ) / 2;
+		if (isNegativeY) y = -1 * y;
+		
+		return new Point(x,y);
 	}
 }
