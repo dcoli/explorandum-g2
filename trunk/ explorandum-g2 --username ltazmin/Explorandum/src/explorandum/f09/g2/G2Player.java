@@ -32,7 +32,7 @@ public class G2Player implements Player {
 //	private HashMap< Point, Integer > bounceCheckHash;
 	
 	public G2Player() {
-		_grid = new Grid();
+		_grid = new Grid( _log );
 		_pastMoves = new ArrayList<PastMove>();
 	}
 
@@ -83,7 +83,10 @@ public class G2Player implements Player {
 			}
 
 			if (isBouncing) {
-				//Cell secondBestChoice = _grid.get_secondBestChoiceCell();
+				Cell secondBestChoice = _grid.get_secondBestChoiceCell();
+				if (secondBestChoice == null)  {
+					secondBestChoice = _grid.getCell(0,0);
+				}
 				// TODO target the latest secondBestChoice
 			}
 			

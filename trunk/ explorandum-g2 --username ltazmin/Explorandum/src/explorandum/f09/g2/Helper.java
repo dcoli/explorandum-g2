@@ -391,8 +391,8 @@ public class Helper {
 		if (unVisitedNeighbours.size() != 0) {
 
 			Cell to = unVisitedNeighbours.get(maxUnvisitedScoreIndex);
-			grid_.removeFrom_secondBestChoices(to, log);
-			// log.info(to);
+			//grid_.removeFrom_secondBestChoices(to, log);
+			log.info("moving to: "+to.toString());
 			return Helper.getMove(point_, to.getPoint());
 		} else /* if(visitedNeighbours.size() != 0) */{
 
