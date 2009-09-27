@@ -58,7 +58,7 @@ public class HistoryHelper {
 				//FOOTSTEPS (TRACKING)
 				historyCount++;
 				if (historyCount <= Constants.SHORT_TERM_HISTORY_LENGTH) {
-					log.debug("Here " + "StepStatus: " + m.StepStatus + " first visited: "
+					log.info("Here " + "StepStatus: " + m.StepStatus + " first visited: "
 							+ c.getFirstTurnVisited() + " last visited: "
 							+ c.getLastTurnVisited() + " owner: " + c.getOwner());
 					if (m.StepStatus == true

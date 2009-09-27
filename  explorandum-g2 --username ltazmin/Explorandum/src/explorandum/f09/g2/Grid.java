@@ -34,14 +34,16 @@ public class Grid {
 	private int maxXVisited = 0;
 	private int minYVisited = 0;
 	private int maxYVisited = 0;
+	private Logger log;
 	
 	/**
 	 * Private Constructor
 	 */
-	public Grid() {
+	public Grid( Logger _log ) {
 		_gridMap = new HashMap<Point, Cell>();
 		_unVisitedCells = new HashSet<Point>();
 		_visitedCells = new HashSet<Point>();
+		log = _log;
 		_secondBestChoices = new ArrayList<Cell>();
 	}
 
@@ -455,7 +457,7 @@ public class Grid {
 		int area = (maxXVisited - minXVisited + 1) * (maxYVisited - minYVisited + 1);
 		float percentUnexplored = 1 - ( ((float)(_visitedCells.size())) / ((float)area) );
 		boolean shouldFindCenter = percentUnexplored > Constants.RATIO_UNEXPLORED_MAP_THRESHOLD;
-		if (shouldFindCenter) log.debug("est. area:"+area+" unexplored:"+(100*percentUnexplored)+"%");
+		if (shouldFindCenter) log.debug("should find center. est. area:"+area+" unexplored:"+(100*percentUnexplored)+"%");
 		return shouldFindCenter;
 	}
 
@@ -598,13 +600,22 @@ public class Grid {
 	 * Remove from the secondbestchoices arraylist in 2n time
 	 */
 	public void removeFrom_secondBestChoices( Cell c, Logger log ){
-		log.debug("removing visited cell from second best choices");
-		for ( int i = 0; i < _secondBestChoices.size(); i++ ) {
-			if ( _secondBestChoices.get(i).equals(c) ) _secondBestChoices.remove(c);
+		int length = _secondBestChoices.size();
+		for ( int i = 0; i < length; i++ ) {
+			if ( _secondBestChoices.get(i) == c ) {
+				_secondBestChoices.remove(i);
+				log.debug("removing visited cell from second best choices: "+_secondBestChoices.toString());
+			}
 		}
 	}
 
-	public Cell get_secondBestChoiceCell() {
-		return _secondBestChoices.get(0);
+	public Cell get_secondBestChoiceCell( ) {
+		if (_secondBestChoices.size() != 0) {
+			Cell c = _secondBestChoices.get(0);
+			removeFrom_secondBestChoices(c, log);
+			return c;
+		}
+		else
+			return null;
 	}
 }
