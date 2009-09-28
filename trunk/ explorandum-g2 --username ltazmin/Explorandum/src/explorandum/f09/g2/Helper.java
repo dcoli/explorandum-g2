@@ -3,6 +3,9 @@ package explorandum.f09.g2;
 
 
 import java.awt.Point;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.ArrayList;
 
 import explorandum.GameConstants;
@@ -20,13 +23,15 @@ public class Helper {
 	/**
 	 * Finds the best cell to target
 	 * 
-	 * @param p
+	 * @param startingPoint
 	 *            Point object of current cell
 	 * @param g
 	 *            Grid of the game
+	 * @param howFarAway how far from starting cell to look for a target. If 0, then use default 2 * d.
+	 * 
 	 * @return optimal cell
 	 */
-	public static Cell getTargetedCell(Point startingPoint, Grid g, Logger log) {
+	public static Cell getTargetedCell(Point startingPoint, Grid g, int howFarAway, Logger log) {
 
 		Cell startingCell = g.getCell(startingPoint);
 		log.debug(startingCell + " <--- START");
@@ -35,10 +40,10 @@ public class Helper {
 		BinaryHeap<Cell> candidateCells = new BinaryHeap<Cell>();
 		
 		// to prevent duplicates after dequeueing
-		ArrayList<Cell> dequeuedCells = new ArrayList<Cell>();
+		HashSet<Cell> dequeuedCells = new HashSet<Cell>();
 
-		int howFarAway = 2 * Constants.RANGE; // how far from current cell to
-												// look for a target
+		if (howFarAway == 0) howFarAway = 2 * Constants.RANGE; // how far from current cell to
+																// look for a target
 
 		int scopeCount = 0;
 		int count = -1; // tracks how many cells are dequeued
@@ -103,11 +108,12 @@ public class Helper {
 	 * 
 	 * @param c
 	 *            the cell
-	 * @param g
-	 * @param cells
+	 * @param grid_ the grid of cells
+	 * @param cells queue of cells being looked at
+	 * @param prevCells set of cells already looked at
 	 * @return number of added cells
 	 */
-	private static int addNeighbors(Cell c, Grid grid_, Queue<Cell> cells, ArrayList<Cell> prevCells, Logger log) {
+	private static int addNeighbors(Cell c, Grid grid_, Queue<Cell> cells, HashSet<Cell> prevCells, Logger log) {
 
 		int retValue = 0;
 
@@ -178,77 +184,51 @@ public class Helper {
 	}
 
 	/**
-	 * Calculates best path using breadth-first search
+	 * Calculates best path using a weight on openness
 	 * 
-	 * @param p1
+	 * @param startPoint
 	 *            starting point
-	 * @param p2
+	 * @param destPoint
 	 *            ending point
 	 * @return path array
 	 */
-	public static Move getPathMove(Point p1, Point p2, Grid g) {
+	public static Point[] getPath(Point startPoint, Point destPoint, Grid g, Logger log) {
 
-		// For now get the next cell to go to in the general direction of
-		// destination cell
+		 Queue<Cell> searchQueue = new Queue<Cell>(); 
+		 LinkedList<Point> path = new LinkedList<Point>();
+		 HashSet<Cell> dequeuedCells = new HashSet<Cell>();
+		 
+		 Cell startCell = g.getCell(startPoint);
+		 Cell destCell = g.getCell(destPoint);
+		 
+		 searchQueue.enqueue(startCell);
+		 
+		 // iterate until start cell is returned
+		 while (destCell != startCell) {
+			 
+			 Cell c = searchQueue.dequeue();
+			 dequeuedCells.add(c);
+			 
+			 addNeighbors(c, g, searchQueue, dequeuedCells, log);
+			 
+			 // If destination is found
+			 if (searchQueue.contains(destCell)) {
+				 
+				 path.add(c.getPoint());
+				 destCell = c;
+				 
+				 // restart queue
+				 searchQueue = new Queue<Cell>();
+				 searchQueue.enqueue(startCell);
+				 
+			 }
 
-		Move possibleMove = new Move(0);
-		Point middleman;
-
-		if (p1.y > p2.y) {
-			if (p1.x > p2.x)
-				possibleMove = new Move(GameConstants.SOUTHEAST);
-			else if (p1.x == p2.x)
-				possibleMove = new Move(GameConstants.SOUTH);
-			else if (p1.x < p2.x)
-				possibleMove = new Move(GameConstants.SOUTHWEST);
-		}
-
-		else if (p1.y == p2.y) {
-			if (p1.x > p2.x)
-				possibleMove = new Move(GameConstants.EAST);
-			else if (p1.x < p2.x)
-				possibleMove = new Move(GameConstants.WEST);
-
-		}
-
-		else if (p1.y < p2.y) {
-
-			if (p1.x > p2.x)
-				possibleMove = new Move(GameConstants.NORTHEAST);
-			else if (p1.x == p2.x)
-				possibleMove = new Move(GameConstants.NORTH);
-			else if (p1.x < p2.x)
-				possibleMove = new Move(GameConstants.NORTHWEST);
-
-		}
-
-		return possibleMove;
-
-		/*
-		 * Queue<Cell> queue = new Queue<Cell>(); LinkedList<Point> path = new
-		 * LinkedList<Point>();
-		 * 
-		 * // breadth-first search Cell c1 = g.getCell(p1);
-		 * 
-		 * queue.enqueue(c1);
-		 * 
-		 * Point pointTo = p2;
-		 * 
-		 * // search backwards while (pointTo != p1) {
-		 * 
-		 * // get the cell right before destination cell Point prev =
-		 * getPath(pointTo, g, queue);
-		 * 
-		 * // add to path list path.addFirst(prev);
-		 * 
-		 * // change destination cell pointTo = prev;
-		 * 
-		 * }
-		 * 
-		 * // add root path.addFirst(p1);
-		 * 
-		 * return (Point[])path.toArray();
-		 */
+		 }
+		 
+		 path.addFirst(destPoint);
+		 Collections.reverse(path);
+		 
+		 return (Point[])path.toArray();
 
 	}
 	
@@ -262,18 +242,18 @@ public class Helper {
 	public static Move getTargetedMoveFrom(Point point_, Grid grid_, Logger log) {
 
 		// get the targeted cell
-		Cell dest = getTargetedCell(point_, grid_, log);
+		Cell dest = getTargetedCell(point_, grid_, 0, log);
 		log.info(dest);
 
 		Point destPoint = dest.getPoint();
 
 		// get the path to that cell
-		// Point points[] = getPath(point_, destPoint, grid_);
+		Point points[] = getPath(point_, destPoint, grid_, log);
 
 		// get the first move
-		Move m = getPathMove(point_, destPoint, grid_);
+		//Move m = getPathMove(point_, destPoint, grid_, log);
 
-		return m;
+		return null; // m;
 	}
 
 	/**
