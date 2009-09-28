@@ -1,12 +1,15 @@
 package explorandum.f09.g2;
 
-
-
 import java.awt.Point;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import explorandum.GameConstants;
 import explorandum.Move;
@@ -16,6 +19,8 @@ import explorandum.Logger;
  * Helper class that supports scoring and path finding etc.
  * 
  * @author laima
+ * @author sharadh
+ * @author colin
  * 
  */
 public class Helper {
@@ -27,51 +32,60 @@ public class Helper {
 	 *            Point object of current cell
 	 * @param g
 	 *            Grid of the game
-	 * @param howFarAway how far from starting cell to look for a target. If 0, then use default 2 * d.
+	 * @param howFarAway
+	 *            how far from starting cell to look for a target. If 0, then
+	 *            use default 2 * d.
 	 * 
 	 * @return optimal cell
 	 */
-	public static Cell getTargetedCell(Point startingPoint, Grid g, int howFarAway, Logger log) {
+
+	public static Cell getTargetedCell(Point startingPoint, Grid g,
+			int howFarAway, Logger log) {
 
 		Cell startingCell = g.getCell(startingPoint);
 		log.debug(startingCell + " <--- START");
-		
+
 		Queue<Cell> neighborCells = new Queue<Cell>();
 		BinaryHeap<Cell> candidateCells = new BinaryHeap<Cell>();
-		
+
 		// to prevent duplicates after dequeueing
 		HashSet<Cell> dequeuedCells = new HashSet<Cell>();
 
-		if (howFarAway == 0) howFarAway = 2 * Constants.RANGE; // how far from current cell to
-																// look for a target
+		if (howFarAway == 0)
+			howFarAway = 2 * Constants.RANGE; // how far from current cell to
+		// look for a target
 
 		int scopeCount = 0;
 		int count = -1; // tracks how many cells are dequeued
 		int prevNeighborCellsCount = 0;
 		int numNeighborCells = 0;
-		
+
 		neighborCells.enqueue(startingCell);
-		
+
 		// evaluate neighbors within a certain range
 		while (scopeCount < howFarAway) {
-			
+
 			Cell c = neighborCells.dequeue(); // get cell
 			dequeuedCells.add(c);
 			count++; // increase
-			
+
 			// (re-)calculate score
 			Grid.computeScore(c, g);
-			log.info(c + " SCORE " + c.getScore());
-			
+			log.debug(c + " SCORE " + c.getScore());
+
 			// add its neighbors
-			numNeighborCells += addNeighbors(c, g, neighborCells, dequeuedCells, log);
-			
+			numNeighborCells += addNeighbors(c, g, neighborCells,
+					dequeuedCells, log);
+
 			// no valid neighbors then add to heap
 			if (numNeighborCells < 1) {
 				candidateCells.insert(c);
-				log.info("Just added to heap (0): " + c + " SCORE " + c.getScore());
+
+				log.debug("Just added to heap (0): " + c + " SCORE "
+						+ c.getScore());
+
 			}
-		
+
 			// keep track of how many sets of neighbors we add to queue
 			if (count == prevNeighborCellsCount) {
 				scopeCount++;
@@ -79,26 +93,135 @@ public class Helper {
 				numNeighborCells = 0;
 				count = 0;
 			}
-				
+
 		}
-		
+
 		// add the remaining cells to heap
 		while (!neighborCells.isEmpty()) {
 			Cell nc = neighborCells.dequeue();
 			if (!nc.isVisited()) {
 				candidateCells.insert(nc);
 			}
-			log.info("Just added to heap (1): " + nc + " SCORE " + nc.getScore());
+
+			log.debug("Just added to heap (1): " + nc + " SCORE "
+					+ nc.getScore());
+
 		}
 
 		candidateCells.printHeap();
-		//System.exit(0);
-		
+		// System.exit(0);
+
 		// pick cell with highest score
 		Cell destinationCell = ((BinaryHeap<Cell>) candidateCells).findMax();
-		
-		log.info("Now targetting "+destinationCell);
 
+		log.debug("Now targetting " + destinationCell);
+
+		return destinationCell;
+
+	}
+
+	/**
+	 * Finds the best cell to target
+	 * 
+	 * @param p
+	 *            Point object of current cell
+	 * @param g
+	 *            Grid of the game
+	 * @return optimal cell
+	 */
+
+	public static Cell getOpenTargetedCell(Point startingPoint, Grid g,
+			Logger log, int range) {
+
+		Cell startingCell = g.getCell(startingPoint);
+		log.debug(startingCell + " <--- START");
+
+		Queue<Cell> neighborCells = new Queue<Cell>();
+		ArrayList<Cell> candidateCells = new ArrayList<Cell>();
+
+		// to prevent duplicates after dequeueing
+		HashSet<Cell> dequeuedCells = new HashSet<Cell>();
+
+		int howFarAway = range; // how far from current cell to
+		// look for a target
+
+		int scopeCount = 0;
+		int count = -1; // tracks how many cells are dequeued
+		int prevNeighborCellsCount = 0;
+		int numNeighborCells = 0;
+
+		neighborCells.enqueue(startingCell);
+
+		// evaluate neighbors within a certain range
+		while (scopeCount < howFarAway) {
+
+			Cell c = neighborCells.dequeue(); // get cell
+			dequeuedCells.add(c);
+			count++; // increase
+
+			// (re-)calculate score
+			Grid.computeScore(c, g);
+			// log.debug(c + " SCORE " + c.getScore());
+
+			// add its neighbors
+			numNeighborCells += addNeighbors(c, g, neighborCells,
+					dequeuedCells, log);
+
+			// no valid neighbors then add to heap
+			if (numNeighborCells < 1) {
+				candidateCells.add(c);
+
+				log.debug("Just added to heap (0): " + c + " SCORE "
+						+ g.getOpennessScore(c.getPoint()));
+
+			}
+
+			// keep track of how many sets of neighbors we add to queue
+			if (count == prevNeighborCellsCount) {
+				scopeCount++;
+				prevNeighborCellsCount = numNeighborCells;
+				numNeighborCells = 0;
+				count = 0;
+			}
+
+		}
+
+		// add the remaining cells to heap
+		while (!neighborCells.isEmpty()) {
+			Cell nc = neighborCells.dequeue();
+			candidateCells.add(nc);
+
+			log.debug("Just added to heap (1): " + nc + " SCORE "
+					+ g.getOpennessScore(nc.getPoint()));
+
+		}
+
+		int maxOpenScore = Integer.MIN_VALUE;
+		int maxOpenScoreIndex = -1;
+		double maxOpenDist = Double.MIN_VALUE;
+		int index = 0;
+		for (Iterator<Cell> iterator = candidateCells.iterator(); iterator
+				.hasNext();) {
+			Cell cell = (Cell) iterator.next();
+			int openScore = g.getOpennessScore(cell.getPoint());
+			if (maxOpenScore < openScore) {
+				maxOpenScoreIndex = index;
+				maxOpenScore = openScore;
+				maxOpenDist = cell.getDistanceFrom(startingPoint);
+			} else if (openScore == maxOpenScore) {
+				double dist = cell.getDistanceFrom(startingPoint);
+				if (maxOpenDist < dist) {
+					maxOpenScoreIndex = index;
+					maxOpenDist = dist;
+				}
+			}
+			index++;
+		}
+
+		// pick cell with highest score
+		Cell destinationCell = candidateCells.get(maxOpenScoreIndex);
+
+		log.debug("Open Cell" + destinationCell);
 		return destinationCell;
 
 	}
@@ -108,12 +231,81 @@ public class Helper {
 	 * 
 	 * @param c
 	 *            the cell
-	 * @param grid_ the grid of cells
-	 * @param cells queue of cells being looked at
-	 * @param prevCells set of cells already looked at
+	 * @param grid_
+	 *            the grid of cells
+	 * @param cells
+	 *            queue of cells being looked at
+	 * @param prevCells
+	 *            set of cells already looked at
 	 * @return number of added cells
 	 */
-	private static int addNeighbors(Cell c, Grid grid_, Queue<Cell> cells, HashSet<Cell> prevCells, Logger log) {
+
+	private static int addNeighbors(Cell c, Grid grid_, Queue<Cell> cells,
+			HashSet<Cell> prevCells, Logger log, HashMap<Point, Point> _prevMap) {
+
+		int retValue = 0;
+		ArrayList<Cell> unvisitedNeighbours = new ArrayList<Cell>();
+
+		ArrayList<Cell> visitedNeighbours = new ArrayList<Cell>();
+
+		// Enqueue edge neighbors
+		for (int i = 1; i < GameConstants._dx.length; i++) {
+			Cell neighborCell = grid_.getCell(c.getPoint(),
+					GameConstants._dx[i], GameConstants._dy[i]);
+
+			if (neighborCell != null) {
+				if (!prevCells.contains(neighborCell)) {
+					if (!cells.contains(neighborCell)
+							&& !neighborCell.isImpassable()) {
+
+						if (neighborCell.isVisited()
+								|| neighborCell.getOwner() == Constants.OWNED_BY_THEM) {
+							visitedNeighbours.add(neighborCell);
+						} else {
+							unvisitedNeighbours.add(neighborCell);
+						}
+						// cells.enqueue(neighborCell);
+						_prevMap.put(neighborCell.getPoint(), c.getPoint());
+						retValue++;
+						// log.debug("         neighbor: " + neighborCell);
+					} else {
+						// log.debug("Case 1 (neighbor: " + neighborCell + ")");
+					}
+				} else {
+					// log.debug("Case 2 (neighbor: " + neighborCell + ")");
+				}
+			} else {
+				// log.debug("Case 3 (neighbor: " + neighborCell + ")");
+			}
+
+		}
+
+		for (Iterator<Cell> iterator = unvisitedNeighbours.iterator(); iterator
+				.hasNext();) {
+			cells.enqueue(iterator.next());
+
+		}
+		for (Iterator<Cell> iterator = visitedNeighbours.iterator(); iterator
+				.hasNext();) {
+			cells.enqueue(iterator.next());
+
+		}
+		return retValue;
+
+	}
+
+	/**
+	 * Adds to a queue immediate neighbors of a certain cell
+	 * 
+	 * @param c
+	 *            the cell
+	 * @param g
+	 * @param cells
+	 * @return number of added cells
+	 */
+
+	private static int addNeighbors(Cell c, Grid grid_, Queue<Cell> cells,
+			HashSet<Cell> prevCells, Logger log) {
 
 		int retValue = 0;
 
@@ -123,58 +315,55 @@ public class Helper {
 					Constants.EDGE_NEIGHBOR_OFFSETS[i][0],
 					Constants.EDGE_NEIGHBOR_OFFSETS[i][1]);
 
-			// limitation in keeping score of null prevents its candidacy (let's ponder this)
+			// limitation in keeping score of null prevents its candidacy (let's
+			// ponder this)
 			// if (neighborCell == null) {
-			//	Point p = new Point();
-			//	Cell nullCell = new Cell(p);
-			//}
-			
+			// Point p = new Point();
+			// Cell nullCell = new Cell(p);
+			// }
+
 			// if the cells is not already in queue
 			// and is land, add to queue
 			if (neighborCell != null) {
-				if (!prevCells.contains(neighborCell)){
-					if (!cells.contains(neighborCell) && !neighborCell.isImpassable()) {
+				if (!prevCells.contains(neighborCell)) {
+					if (!cells.contains(neighborCell)
+							&& !neighborCell.isImpassable()) {
 						cells.enqueue(neighborCell);
 						retValue++;
-						log.info("         neighbor: " + neighborCell);
-					}	
-					else {
-						log.info("Case 1 (neighbor: " + neighborCell + ")");
+						// log.debug("         neighbor: " + neighborCell);
+					} else {
+						// log.debug("Case 1 (neighbor: " + neighborCell + ")");
 					}
-				}	
-				else {
-					log.info("Case 2 (neighbor: " + neighborCell + ")");
+				} else {
+					// log.debug("Case 2 (neighbor: " + neighborCell + ")");
 				}
-			}	
-			else {
-				log.info("Case 3 (neighbor: " + neighborCell + ")");
+			} else {
+				// log.debug("Case 3 (neighbor: " + neighborCell + ")");
 			}
 
 		}
-		
+
 		// Enqueue vertex neighbors
 		for (int i = 0; i < Constants.VERTEX_NEIGHBOR_OFFSETS.length; i++) {
 			Cell neighborCell = grid_.getCell(c.getPoint(),
 					Constants.VERTEX_NEIGHBOR_OFFSETS[i][0],
 					Constants.VERTEX_NEIGHBOR_OFFSETS[i][1]);
-			
+
 			if (neighborCell != null) {
-				if (!prevCells.contains(neighborCell)){
-					if (!cells.contains(neighborCell) && !neighborCell.isImpassable()) {
+				if (!prevCells.contains(neighborCell)) {
+					if (!cells.contains(neighborCell)
+							&& !neighborCell.isImpassable()) {
 						cells.enqueue(neighborCell);
 						retValue++;
-						log.info("         neighbor: " + neighborCell);
-					}	
-					else {
-						log.info("Case 1 (neighbor: " + neighborCell + ")");
+						// log.debug("         neighbor: " + neighborCell);
+					} else {
+						// log.debug("Case 1 (neighbor: " + neighborCell + ")");
 					}
-				}	
-				else {
-					log.info("Case 2 (neighbor: " + neighborCell + ")");
+				} else {
+					// log.debug("Case 2 (neighbor: " + neighborCell + ")");
 				}
-			}	
-			else {
-				log.info("Case 3 (neighbor: " + neighborCell + ")");
+			} else {
+				// log.debug("Case 3 (neighbor: " + neighborCell + ")");
 			}
 
 		}
@@ -192,46 +381,47 @@ public class Helper {
 	 *            ending point
 	 * @return path array
 	 */
-	public static Point[] getPath(Point startPoint, Point destPoint, Grid g, Logger log) {
+	public static Point[] getPath1(Point startPoint, Point destPoint, Grid g,
+			Logger log) {
 
-		 Queue<Cell> searchQueue = new Queue<Cell>(); 
-		 LinkedList<Point> path = new LinkedList<Point>();
-		 HashSet<Cell> dequeuedCells = new HashSet<Cell>();
-		 
-		 Cell startCell = g.getCell(startPoint);
-		 Cell destCell = g.getCell(destPoint);
-		 
-		 searchQueue.enqueue(startCell);
-		 
-		 // iterate until start cell is returned
-		 while (destCell != startCell) {
-			 
-			 Cell c = searchQueue.dequeue();
-			 dequeuedCells.add(c);
-			 
-			 addNeighbors(c, g, searchQueue, dequeuedCells, log);
-			 
-			 // If destination is found
-			 if (searchQueue.contains(destCell)) {
-				 
-				 path.add(c.getPoint());
-				 destCell = c;
-				 
-				 // restart queue
-				 searchQueue = new Queue<Cell>();
-				 searchQueue.enqueue(startCell);
-				 
-			 }
+		Queue<Cell> searchQueue = new Queue<Cell>();
+		LinkedList<Point> path = new LinkedList<Point>();
+		HashSet<Cell> dequeuedCells = new HashSet<Cell>();
 
-		 }
-		 
-		 path.addFirst(destPoint);
-		 Collections.reverse(path);
-		 
-		 return (Point[])path.toArray();
+		Cell startCell = g.getCell(startPoint);
+		Cell destCell = g.getCell(destPoint);
+
+		searchQueue.enqueue(startCell);
+
+		// iterate until start cell is returned
+		while (destCell != startCell) {
+
+			Cell c = searchQueue.dequeue();
+			dequeuedCells.add(c);
+
+			addNeighbors(c, g, searchQueue, dequeuedCells, log);
+
+			// If destination is found
+			if (searchQueue.contains(destCell)) {
+
+				path.add(c.getPoint());
+				destCell = c;
+
+				// restart queue
+				searchQueue = new Queue<Cell>();
+				searchQueue.enqueue(startCell);
+
+			}
+
+		}
+
+		path.addFirst(destPoint);
+		Collections.reverse(path);
+
+		return (Point[]) path.toArray();
 
 	}
-	
+
 	/**
 	 * From a given point gets the best cell to target and returns a move
 	 * 
@@ -248,10 +438,10 @@ public class Helper {
 		Point destPoint = dest.getPoint();
 
 		// get the path to that cell
-		Point points[] = getPath(point_, destPoint, grid_, log);
+		Point points[] = getPath1(point_, destPoint, grid_, log);
 
 		// get the first move
-		//Move m = getPathMove(point_, destPoint, grid_, log);
+		// Move m = getPathMove(point_, destPoint, grid_, log);
 
 		return null; // m;
 	}
@@ -274,9 +464,18 @@ public class Helper {
 	 * @param to_
 	 * @return
 	 */
-	public static Move getMove(Point from_, Point to_) {
+	public static Move getMove(Point from_, Point to_, Grid grid_)
+			throws IllegalArgumentException {
 		// int diffX = from_.x - to_.x;
 		// int diffY = from_.y - to_.y;
+
+		if (to_ == null) {
+			throw new IllegalArgumentException("to" + to_);
+		}
+
+		if (grid_.getCell(to_).isImpassable()) {
+			throw new IllegalArgumentException("to" + grid_.getCell(to_));
+		}
 
 		int diffX = to_.x - from_.x;
 		int diffY = to_.y - from_.y;
@@ -320,18 +519,19 @@ public class Helper {
 	 * @param point_
 	 * @return
 	 */
-	public static Move getMoveFrom(Point point_, Grid grid_, Logger log) {
+	public static Point getMoveFrom(Point point_, Grid grid_, Logger log,
+			Point prev, boolean isCoastHugging) throws IllegalArgumentException {
 
 		ArrayList<Cell> unVisitedNeighbours = new ArrayList<Cell>();
 		ArrayList<Cell> visitedNeighbours = new ArrayList<Cell>();
 		double maxUnvisitedScore = Integer.MIN_VALUE;
 		int maxUnvisitedScoreIndex = 0;
-		int secondBestChoiceIndex = 0;
-		int maxVisitedScore = Integer.MIN_VALUE;
-		int maxVisitedScoreIndex = 0;
+
 		int oldestVisitIndex = 0;
 		int oldestVisit = Integer.MAX_VALUE;
-		Cell bestCell;
+
+		int maxScoreCount = 0;
+
 		for (int i = 0; i < 8; i++) {
 			Cell c = grid_.getCell(point_, GameConstants._dx[i + 1],
 					GameConstants._dy[i + 1]);
@@ -339,101 +539,252 @@ public class Helper {
 				if (!c.isImpassable()) {
 					if (c.isVisited()) {
 						visitedNeighbours.add(c);
-//						if (c.getLastTurnVisited() < oldestVisit) {
-//							oldestVisitIndex = visitedNeighbours.size() - 1;
-//							oldestVisit = c.getLastTurnVisited();
-//
-//						}
-						
-						int cellOpennessScore = grid_.getOpennessScore(c.getPoint());
-						log.info(cellOpennessScore);
-						if (cellOpennessScore > maxVisitedScore) {
-							maxVisitedScoreIndex = visitedNeighbours.size() - 1;
-							maxVisitedScore = cellOpennessScore;
+						visitedNeighbours.add(c);
+						if (c.getLastTurnVisited() < oldestVisit) {
+							oldestVisitIndex = visitedNeighbours.size() - 1;
+							oldestVisit = c.getLastTurnVisited();
+
 						}
 					} else {
-						unVisitedNeighbours.add(c);
+
 						double cellScore = c.getScore();
-						log.info(cellScore);
+
+						// if (isCoastHugging && prev != null) {
+						// if (2 * c.getDistanceFrom(point_) == c
+						// .getDistanceFrom(prev)) {
+						// cellScore += 5;
+						// }
+						// }
+						// log.debug(cellScore);
+
 						if (cellScore > maxUnvisitedScore) {
-							grid_.get_secondBestChoices().add(0, c);
-							bestCell = c;
-							maxUnvisitedScoreIndex = unVisitedNeighbours.size() - 1;
+
 							maxUnvisitedScore = cellScore;
+
+							unVisitedNeighbours.add(0, c);
+							maxScoreCount = 1;
+						} else if (cellScore == maxUnvisitedScore) {
+							maxScoreCount++;
+							unVisitedNeighbours.add(0, c);
+						} else {
+							unVisitedNeighbours.add(c);
+
 						}
 					}
 				}
 			}
 		}
 
-		log.info("MaxScore" + maxUnvisitedScore);
+		// log.debug("MaxScore" + maxUnvisitedScore);
 
 		if (unVisitedNeighbours.size() != 0) {
-
+			maxUnvisitedScoreIndex = (int) Math.random() / Integer.MAX_VALUE
+					% (maxScoreCount + 1);
 			Cell to = unVisitedNeighbours.get(maxUnvisitedScoreIndex);
-			//grid_.removeFrom_secondBestChoices(to, log);
-			log.info("moving to: "+to.toString());
-			return Helper.getMove(point_, to.getPoint());
-		} else /* if(visitedNeighbours.size() != 0) */{
 
-			// return Helper.getTargetedMoveFrom(point_, grid_);
-			Cell to = visitedNeighbours.get(maxVisitedScoreIndex);
-			grid_.removeFrom_secondBestChoices(to, log);
-			return Helper.getMove(point_, to.getPoint());
+			return to.getPoint();
+
+		} else /* if(visitedNeighbours.size() != 0) */{
+			// if (visitedNeighbours.size() == 1) {
+			// throw new IllegalArgumentException("Caught in a trap");
+			// }
+
+			Cell to = visitedNeighbours.get(oldestVisitIndex);
+			return to.getPoint();
+
 		}
 	}
 
-	public static Move getNextMoveTowardsTarget(Point currentLocation_,
-			Grid grid_, TargetInfo target_) {
+	public static ArrayList<Point> getBeeLinePath(Point src_, Point dest_,
+			boolean includeDest_) {
+		int dx = dest_.x - src_.x;
+		int dy = dest_.y - src_.y;
 
-		int dx = target_.getTarget().x - currentLocation_.x;
-		int dy = target_.getTarget().y - currentLocation_.y;
+		ArrayList<Point> path = new ArrayList<Point>();
 
-		int[][] possOffsets = new int[3][2];
 		if (dx == 0) {
-			possOffsets[0] = new int[] { 0, (int) Math.signum(dy) * 1 };
-			possOffsets[1] = new int[] { 1, (int) Math.signum(dy) * 1 };
-			possOffsets[2] = new int[] { -1, (int) Math.signum(dy) * 1 };
+			int moddy = Math.abs(dy);
+			for (int i = 1; i <= moddy; i++) {
+				path.add(new Point(src_.x, src_.y + i * dy / moddy));
+			}
 		} else if (dy == 0) {
-			possOffsets[0] = new int[] { (int) Math.signum(dx) * 1, 0 };
-			possOffsets[1] = new int[] { (int) Math.signum(dx) * 1, 1 };
-			possOffsets[2] = new int[] { (int) Math.signum(dx) * 1, -1 };
+			int moddx = Math.abs(dx);
+			for (int i = 1; i <= moddx; i++) {
+				path.add(new Point(src_.x + i * dx / moddx, src_.y));
+			}
 		} else {
-			possOffsets[0] = new int[] { (int) Math.signum(dy) * 1,
-					(int) Math.signum(dy) * 1 };
-			possOffsets[1] = new int[] { 0, (int) Math.signum(dy) * 1 };
-			possOffsets[2] = new int[] { (int) Math.signum(dx) * 1, 0 };
+			int moddx = Math.abs(dx);
+			int moddy = Math.abs(dy);
+			int signx = dx > 0 ? 1 : -1;
+			int signy = dy > 0 ? 1 : -1;
 
-		}
+			int diagDist = moddx < moddy ? moddx : moddy;
 
-		ArrayList<Cell> possMoves = new ArrayList<Cell>();
-		double maxScore = Integer.MIN_VALUE;
-		int maxScoreIndex = 0;
-		for (int i = 0; i < possOffsets.length; i++) {
-			Cell c = grid_.getCell(currentLocation_, possOffsets[i][0],
-					possOffsets[i][1]);
-			// log.info(c.getPoint() + " " + c.getScore());
-			if (!c.isImpassable()) {
-				possMoves.add(c);
-				// int cellScore = c.getScore() - c.getLastTurnVisited() + ;
-				double cellScore = c.getScore()
-						- (int) c.getDistanceFrom(target_.getTarget());
-				if (cellScore > maxScore) {
-					maxScoreIndex = possMoves.size() - 1;
-					maxScore = cellScore;
+			for (int i = 1; i <= diagDist; i++) {
+				path.add(new Point(src_.x + i * signx, src_.y + i * signy));
+			}
+
+			if (moddx > moddy) {
+
+				for (int i = diagDist + 1; i <= moddx; i++) {
+					path.add(new Point(src_.x + i * signx, src_.y + diagDist
+							* signy));
+
+				}
+			} else if (moddy > moddx) {
+
+				for (int i = diagDist + 1; i <= moddy; i++) {
+					path.add(new Point(src_.x + diagDist * signx, src_.y + i
+							* signy));
 				}
 			}
 		}
 
-		if (possMoves.size() != 0) {
+		if (!includeDest_) {
+			path.remove(path.size() - 1);
+		}
+		return path;
 
-			Cell to = possMoves.get(maxScoreIndex);
-			// log.info(to);
-			return Helper.getMove(currentLocation_, to.getPoint());
+	}
+
+	/**
+	 * Lumbers towards target
+	 * 
+	 * @param currentLocation_
+	 * @param grid_
+	 * @param lti_
+	 * @return
+	 */
+	public static Point lumberTowardsTarget(Point currentLocation_,
+			LumberingTargetInfo lti_) {
+		Grid grid_ = lti_.getGrid();
+		ArrayList<Cell> _unvisitedCellList = new ArrayList<Cell>();
+		ArrayList<Cell> _visitedCellList = new ArrayList<Cell>();
+
+		// Enqueue edge neighbors
+		for (int i = 1; i < GameConstants._dx.length; i++) {
+			Cell neighborCell = grid_.getCell(currentLocation_,
+					GameConstants._dx[i], GameConstants._dy[i]);
+			if (neighborCell.isVisited()) {
+				if (neighborCell.getLastTurnVisited() < lti_.getTurn()) {
+					_visitedCellList.add(neighborCell);
+				}
+			} else {
+				_unvisitedCellList.add(neighborCell);
+			}
+		}
+
+		if (_unvisitedCellList.size() != 0) {
+			int bestCellIndex = -1;
+			double currDistToTarget = currentLocation_.distance(lti_
+					.getTarget());
+			double minDistToTarget = Double.MAX_VALUE;
+			for (int i = 0; i < _unvisitedCellList.size(); i++) {
+				double distToTarget = _unvisitedCellList.get(i).getPoint()
+						.distance(lti_.getTarget());
+				if (distToTarget < minDistToTarget
+						&& distToTarget < currDistToTarget) {
+					minDistToTarget = distToTarget;
+					bestCellIndex = i;
+				}
+			}
+
+			if (bestCellIndex != -1) {
+				return _unvisitedCellList.get(bestCellIndex).getPoint();
+			}
+		}
+
+		if (_visitedCellList.size() != 0) {
+			int bestCellIndex = -1;
+			double currDistToTarget = currentLocation_.distance(lti_
+					.getTarget());
+			double minDistToTarget = Double.MAX_VALUE;
+			for (int i = 0; i < _visitedCellList.size(); i++) {
+				double distToTarget = _visitedCellList.get(i).getPoint()
+						.distance(lti_.getTarget());
+				if (distToTarget < minDistToTarget
+						&& distToTarget < currDistToTarget) {
+					minDistToTarget = distToTarget;
+					bestCellIndex = i;
+				}
+			}
+
+			if (bestCellIndex != -1) {
+				return _visitedCellList.get(bestCellIndex).getPoint();
+			}
+		}
+
+		return null;
+	}
+
+	public static Point getOldestVisitedNeighbourIfNoUnvisitedNeighbourExists(
+			Point currentLocation_, Grid grid_) {
+		Point oldestNeighbour = null;
+		int oldestTurn = Integer.MAX_VALUE;
+		for (int i = 1; i < GameConstants._dx.length; i++) {
+			Cell c = grid_.getCell(currentLocation_, GameConstants._dx[i],
+					GameConstants._dy[i]);
+			if (!c.isImpassable()) {
+
+				if (c.isVisited()) {
+					if (oldestTurn > c.getLastTurnVisited()) {
+						oldestTurn = c.getLastTurnVisited();
+						oldestNeighbour = c.getPoint();
+					} else {
+						return null;
+					}
+				}
+			}
+		}
+
+		return oldestNeighbour;
+	}
+
+	public static ArrayList<Point> getPath2(Point startPoint, Point destPoint,
+			Grid g, Logger log) {
+
+		Queue<Cell> searchQueue = new Queue<Cell>();
+		HashSet<Cell> dequeuedCells = new HashSet<Cell>();
+
+		HashMap<Point, Point> _prevMap = new HashMap<Point, Point>();
+
+		Cell startCell = g.getCell(startPoint);
+		Cell destCell = g.getCell(destPoint);
+
+		searchQueue.enqueue(startCell);
+
+		boolean isDestFound = false;
+		// iterate until start cell is returned
+		while (!searchQueue.isEmpty()) {
+
+			Cell c = searchQueue.dequeue();
+			dequeuedCells.add(c);
+
+			addNeighbors(c, g, searchQueue, dequeuedCells, log, _prevMap);
+
+			// If destination is found
+			if (searchQueue.contains(destCell)) {
+				isDestFound = true;
+				break;
+
+			}
+
+		}
+
+		if (isDestFound) {
+			ArrayList<Point> path = new ArrayList<Point>();
+			path.add(0, destPoint);
+			Point curr = destPoint;
+			Point prev = null;
+			while (!curr.equals(startPoint)) {
+				prev = _prevMap.get(curr);
+				path.add(0, prev);
+				curr = prev;
+			}
+
+			return path;
 		} else {
-			// TODO Auto-generated method stub
 			return null;
 		}
 	}
-
 }

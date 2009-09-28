@@ -14,7 +14,7 @@ import explorandum.Move;
 /**
  * Helper class to hold functions which analyze history
  * 
- * @author sharadh
+ * @author colin
  * 
  */
 public class HistoryHelper {
@@ -36,12 +36,13 @@ public class HistoryHelper {
 		int historyCount = 0;
 		int footprintCount = 0;
 		int claimCount = 0;
-		int dxCount = 0;
-		int dyCount = 0;
-		boolean isBouncing = true, isTracking = true, isRetracing = true;
-		boolean[] retVal = { false, false, false };
+		int newCellSeenCount = 0;
+		boolean isBouncing = false, isTracking = false, isRetracing = false,isNotSeeingNewCells = false;
+		boolean[] retVal = { false, false, false, false};
 		
-		
+		if(pastMoves.size() != Constants.LONG_TERM_HISTORY_LENGTH){
+			return retVal;
+		}
 		/*
 		 * bouncing - checks pastMoves for uniqueness within given threshold
 		 */
@@ -50,17 +51,22 @@ public class HistoryHelper {
 //		log.debug("pastmoves size "+pastMoves.size());
 
 			for (PastMove m: pastMoves) {
-				Cell c = grid_.getCell(m.getCurrentLocation_());
+				Cell c = grid_.getCell(m.getCurrentLocation());
 
 				//BOUNCING
-				bounceHash.add(m.getCurrentLocation_());
+				bounceHash.add(m.getCurrentLocation());
 
 				//FOOTSTEPS (TRACKING)
 				historyCount++;
 				if (historyCount <= Constants.SHORT_TERM_HISTORY_LENGTH) {
-					log.info("Here " + "StepStatus: " + m.StepStatus + " first visited: "
-							+ c.getFirstTurnVisited() + " last visited: "
-							+ c.getLastTurnVisited() + " owner: " + c.getOwner());
+
+					newCellSeenCount += m.newSeenCellCount;
+					
+//					log.debug("Here " + m.StepStatus + " "
+//							+ c.getFirstTurnVisited() + " "
+//							+ c.getLastTurnVisited() + " " + c.getOwner());
+
+
 					if (m.StepStatus == true
 							&& c.getOwner() != Constants.OWNED_BY_US) {
 						footprintCount++;
@@ -82,13 +88,13 @@ public class HistoryHelper {
 		//TEST BOUNCING
 		if ( pastMoves.size() - bounceHash.size() > Constants.BOUNCING_THRESHOLD) {
 			isBouncing = true;
-			log.debug("pastMoves size: "+ pastMoves.size() +" obj:"+pastMoves.toString());
-			log.debug("bounceHash size: "+ bounceHash.size() +" obj:"+bounceHash.toString());
+			//log.debug("pastMoves size: "+ pastMoves.size() +" obj:"+pastMoves.toString());
+			//log.debug("bounceHash size: "+ bounceHash.size() +" obj:"+bounceHash.toString());
 		}
 				
 
 		//TEST FOOTPRINTS
-		Point currentLocation = pastMoves.get(0).getCurrentLocation_();
+		Point currentLocation = pastMoves.get(0).getCurrentLocation();
 		if (footprintCount >= Constants.getFootPrintThreshold(currTurn_,totalNoOfTurns_)) { //if too many footprints
 			isTracking = true;
 			log.debug(footprintCount);
@@ -96,15 +102,24 @@ public class HistoryHelper {
 		}
 
 		// TEST RETRACING
-		if (currTurn_>= 0.05 * totalNoOfTurns_ && claimCount <= Constants.getClaimThreshold(currTurn_, totalNoOfTurns_)) {
+		if (currTurn_>= 0.5 * totalNoOfTurns_ && claimCount <= Constants.getClaimThreshold(currTurn_, totalNoOfTurns_)) {
 			log.debug("Claim Threshold reached");
 			isRetracing = true;
+			// log.debug(grid_.getOpenRandomTarget(currentLocation));
+		}
+		
+		// TEST RETRACING
+		if (newCellSeenCount/Constants.SHORT_TERM_HISTORY_LENGTH == 0) {
+			log.debug("New cells Threshold reached");
+			isNotSeeingNewCells = true;
 			// log.debug(grid_.getOpenRandomTarget(currentLocation));
 		}
 
 		retVal[Constants.HISTORY_BOUNCES_INDEX] = isBouncing;
 		retVal[Constants.HISTORY_FOOTPRINT_INDEX] = isTracking;
 		retVal[Constants.HISTORY_CLAIM_INDEX] = isRetracing;
+
+		retVal[Constants.HISTORY_NEW_CELL_COUNT_INDEX] = isNotSeeingNewCells;
 		return retVal;
 
 	}

@@ -33,6 +33,21 @@ public class Cell implements Comparable<Cell> {
 	private int turnFirstVisited = 0;
 	private int turnLastVisited = 0;
 	private int noOfTimesVisited = 0;
+	private int turnFirstSeen = 0;
+	/**
+	 * @return the turnFirstSeen
+	 */
+	public int getTurnFirstSeen() {
+		return turnFirstSeen;
+	}
+
+	/**
+	 * @param turnFirstSeen_ the turnFirstSeen to set
+	 */
+	public void setTurnFirstSeen(int turnFirstSeen_) {
+		turnFirstSeen = turnFirstSeen_;
+	}
+
 	private int minDistanceSeenFrom = Integer.MAX_VALUE;
 	private double score = 0;
 
