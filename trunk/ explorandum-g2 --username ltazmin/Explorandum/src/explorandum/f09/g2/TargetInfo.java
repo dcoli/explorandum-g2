@@ -1,65 +1,36 @@
 package explorandum.f09.g2;
 
 import java.awt.Point;
+import java.util.ArrayList;
 
-public class TargetInfo {
+public  abstract class TargetInfo {
 
-	private Point target;
-	private int originaldx = 0;
-	private int originaldy = 0;
-	private int moveCount = 0;
-	private int maxMoveAllowed = 0;
+	protected Point _src;
+	protected Point _target;
 
-	public TargetInfo(Point target_, Point currentLocation_) {
-		super();
-		target = target_;
-		//System.out.println(target);
+	public TargetInfo(Point src_, Point target_) {
 
-		//System.out.println(currentLocation_);
-		originaldx = target_.x - currentLocation_.x;
-		originaldy = target_.y - currentLocation_.y;
-		maxMoveAllowed = Math.abs(originaldx) + Math.abs(originaldy);
+		_src = src_;
+		_target = target_;
+
+
+	}
+
+	/**
+	 * @return the src
+	 */
+	public Point getSrc() {
+		return _src;
 	}
 
 	/**
 	 * @return the target
 	 */
 	public Point getTarget() {
-		return target;
+		return _target;
 	}
 
-	/**
-	 * @return the originaldx
-	 */
-	public int getOriginaldx() {
-		return originaldx;
-	}
-
-	/**
-	 * @return the originaldy
-	 */
-	public int getOriginaldy() {
-		return originaldy;
-	}
-
-	/**
-	 * @return the moveCount
-	 */
-	public int getMoveCount() {
-		return moveCount;
-	}
-
-	/**
-	 * @return the maxMoveAllowed
-	 */
-	public int getMaxMoveAllowed() {
-		return maxMoveAllowed;
-	}
-
-	/**
-	 * Increments moveCount
-	 */
-	public void incrementMoveCount() {
-		moveCount++;
-	}
+	public abstract boolean isTargetReached(Point currentLocation_);
+	
+	public abstract Point getNextPoint(Point currentLocation_);
 }

@@ -27,7 +27,7 @@ public class PastMove {
 	/**
 	 * @return the currentLocation_
 	 */
-	public Point getCurrentLocation_() {
+	public Point getCurrentLocation() {
 		return currentLocation_;
 	}
 
